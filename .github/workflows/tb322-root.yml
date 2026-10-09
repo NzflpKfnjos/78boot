@@ -1,0 +1,180 @@
+name: Build and sign TB322 root candidate
+
+on:
+  push:
+    branches: [codex/no-manager-actions]
+    paths:
+      - '.github/workflows/tb322-root.yml'
+      - 'config/**'
+      - 'ci/**'
+      - 'scripts/**'
+      - 'tools/avb/**'
+      - 'bin/**'
+      - 'tests/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tb322-root-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  host-policy:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - run: python3 tests/test_root_control.py
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: host-policy-evidence
+          path: verification/VERIFICATION.txt
+
+  lkm:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    container:
+      image: ghcr.io/ylarod/ddk-min:android15-6.6-20260828
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Fetch fixed upstream
+        run: python3 scripts/fetch_upstream.py KernelSU
+      - name: Build without Manager
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          test -n "${KDIR:-}"
+          test -f "$KDIR/Makefile"
+          CONFIG_KSU=m CC=clang make -C upstream/KernelSU/kernel \
+            CONFIG_KSU=m CONFIG_KSU_DISABLE_MANAGER=y \
+            CONFIG_KSU_DISABLE_POLICY=n CONFIG_KSU_DEBUG=n 2>&1 | tee out/lkm-build.log
+          cp upstream/KernelSU/kernel/kernelsu.ko out/android15-6.6_kernelsu.ko
+          cp upstream/KernelSU/kernel/compile_commands.json out/
+          llvm-readelf -h out/android15-6.6_kernelsu.ko > out/lkm-elf.txt
+          llvm-readelf -p .modinfo out/android15-6.6_kernelsu.ko > out/lkm-modinfo.txt
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          commands = Path('out/compile_commands.json').read_text()
+          assert '-DCONFIG_KSU_DISABLE_MANAGER=1' in commands
+          assert '-DCONFIG_KSU_DEBUG=1' not in commands
+          assert 'AArch64' in Path('out/lkm-elf.txt').read_text()
+          PY
+          sha256sum out/*.ko > out/SHA256SUMS
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: tb322-lkm
+          path: out/
+          if-no-files-found: error
+
+  userspace:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - run: python3 scripts/fetch_upstream.py KernelSU
+      - uses: nttld/setup-ndk@2817442ee7c3346c1eb7d2ec60263c93206ba14f # v1
+        id: ndk
+        with:
+          ndk-version: r29
+      - name: Build Android init, Android daemon and host patcher
+        shell: bash
+        env:
+          ANDROID_NDK_HOME: ${{ steps.ndk.outputs.ndk-path }}
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y libclang-dev
+          rustup update stable
+          rustup target add aarch64-linux-android
+          mkdir -p out
+          cd upstream/KernelSU
+          source .github/scripts/setup-rust-build.sh aarch64-linux-android 26
+          BUILTINS="$($CLANG_PATH --print-resource-dir)/lib/linux/libclang_rt.builtins-aarch64-android.a"
+          test -f "$BUILTINS"
+          RUSTFLAGS="-C target-feature=+crt-static -C link-arg=-Wl,-z,max-page-size=16384 -C link-arg=-Wno-unused-command-line-argument -C link-arg=$BUILTINS" \
+            cargo build --locked --release --package ksuinit --target aarch64-linux-android
+          cp target/aarch64-linux-android/release/ksuinit ../../out/ksuinit
+          cp ../../out/ksuinit userspace/ksud/bin/aarch64/ksuinit
+          cargo build --locked --release --package ksud --target aarch64-linux-android
+          cp target/aarch64-linux-android/release/ksud ../../out/ksud-android
+          cargo build --locked --release --package ksud
+          cp target/release/ksud ../../out/ksud-host
+          rustc --version > ../../out/rust-version.txt
+          sha256sum ../../out/ksuinit ../../out/ksud-* > ../../out/SHA256SUMS
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: tb322-userspace
+          path: out/
+          if-no-files-found: error
+
+  signed-candidate:
+    needs: [host-policy, lkm, userspace]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: tb322-lkm
+          path: artifacts/lkm
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: tb322-userspace
+          path: artifacts/userspace
+      - name: Restore supplied signing tool and keys
+        env:
+          AVB_RSA2048: ${{ secrets.ROOT_CONTROL_AVB_RSA2048 }}
+          AVB_RSA4096: ${{ secrets.ROOT_CONTROL_AVB_RSA4096 }}
+        run: |
+          python3 - <<'PY'
+          import base64, os, shutil
+          from pathlib import Path
+          base = Path('签名工具/avb')
+          (base / 'tools/pem').mkdir(parents=True)
+          shutil.copyfile('tools/avb/rebuild_avb.py', base / 'rebuild_avb.py')
+          shutil.copyfile('tools/avb/avbtool.py', base / 'tools/avbtool.py')
+          for bits in (2048, 4096):
+              value = os.environ[f'AVB_RSA{bits}']
+              if not value:
+                  raise SystemExit(f'Missing ROOT_CONTROL_AVB_RSA{bits} Actions secret')
+              path = base / f'tools/pem/testkey_rsa{bits}.pem'
+              path.write_bytes(base64.b64decode(value, validate=True))
+              path.chmod(0o600)
+          PY
+      - name: Verify stock input hashes
+        run: python3 scripts/verify_ci_inputs.py
+      - name: Patch a copy of init_boot with the fixed no-Manager LKM
+        run: |
+          mkdir -p work/raw
+          chmod 700 artifacts/userspace/ksud-host
+          artifacts/userspace/ksud-host boot-patch \
+            --boot ci/stock/init_boot.img \
+            --module artifacts/lkm/android15-6.6_kernelsu.ko \
+            --init artifacts/userspace/ksuinit \
+            --kmi android15-6.6 --out work/raw --out-name init_boot.img
+          python3 scripts/prepare_avb_input.py \
+            --stock ci/stock/init_boot.img --patched work/raw/init_boot.img \
+            --output work/init_boot.img
+      - name: Sign with the supplied tool and require signature verification
+        run: |
+          python3 scripts/sign_images.py --init-boot work/init_boot.img \
+            --vbmeta ci/stock/vbmeta.img --output out/signed
+          cp ci/stock/init_boot.img out/signed/stock-init_boot.img
+          cp ci/stock/vbmeta.img out/signed/stock-vbmeta.img
+          cp config/upstreams.lock.json out/signed/
+          cp config/no-manager.config out/signed/
+          cp ci/CANDIDATE-NOTES.txt out/signed/
+          sha256sum out/signed/*.img > out/signed/SHA256SUMS
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: tb322-signed-init_boot-and-vbmeta
+          path: out/signed/
+          if-no-files-found: error
+      - name: Remove ephemeral keys
+        if: always()
+        run: rm -rf '签名工具/avb/tools/pem'

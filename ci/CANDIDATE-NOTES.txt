@@ -1,0 +1,24 @@
+This is a TB322 ZUXOS_1.1.11.263 build candidate, not a device-validated release.
+
+KernelSU commit: df03912f70d92ff2aa9762ef82d607033d37e1da
+KMI: android15-6.6; stock boot identifies 6.6.89-android15-8, 4K pages.
+CONFIG_KSU_DISABLE_MANAGER=y; CONFIG_KSU_DEBUG=n; allow_shell=1 is not enabled.
+
+init_boot.img and vbmeta.img form a matching pair signed using the supplied
+AVB rebuilder and matching supplied RSA key. The boot image is not changed
+by this LKM candidate. Host checks do not prove a successful device boot,
+module ABI compatibility, SELinux access, or successful target script execution.
+
+This candidate loads the LKM through ksuinit. It does not provision /data/adb/ksud
+or the target script. The separately built ksud-android and the project's
+fixed-script entry still require a tested root bootstrap/provisioning path.
+No long-running payload or auto-start service is enabled.
+
+stock-init_boot.img and stock-vbmeta.img are the unchanged package inputs.
+Their suitability for recovery depends on matching the running device build
+and active slot. No device was attached when these inputs were selected.
+The included ROLLBACK.sh restores a copy to its pre-signing intermediate bytes;
+it is an offline signing rollback, not a device firmware recovery command.
+
+Kernel sources: GPL-2.0-only. KernelSU userspace: GPL-3.0-or-later.
+Source URLs and exact commits are recorded in upstreams.lock.json.

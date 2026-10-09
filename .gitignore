@@ -1,0 +1,10 @@
+/upstream/
+/y700/
+/签名工具/
+/verification/signing-stock-roundtrip/
+/verification/signing-smoke/
+/verification/actions-download/
+/out/
+/work/
+__pycache__/
+*.pyc

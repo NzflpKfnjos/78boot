@@ -1,0 +1,508 @@
+当前工作目录: /private/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/avb-diagnostic-_y7sm5zo
+[INFO] 使用手动指定的私钥: /Users/a77/Desktop/git/78boot/签名工具/avb/tools/pem/testkey_rsa4096.pem
+=== AVB重建开始 ===
+
+=== 创建备份: backup_20261009_233947 ===
+[BACKUP] vbmeta.img -> backup_20261009_233947/vbmeta.img
+[BACKUP] init_boot.img -> backup_20261009_233947/init_boot.img
+[指定] 使用分区镜像: init_boot -> init_boot.img
+[INFO] 解析 init_boot.img 信息
+[CMD] /Library/Frameworks/Python.framework/Versions/3.12/bin/python3 /Users/a77/Desktop/git/78boot/scripts/avbtool_host.py info_image --image init_boot.img
+[OUTPUT]
+Footer version:           1.0
+Image size:               8388608 bytes
+Original image size:      2465792 bytes
+VBMeta offset:            2465792
+VBMeta size:              832 bytes
+--
+Minimum libavb version:   1.0
+Header Block:             256 bytes
+Authentication Block:     0 bytes
+Auxiliary Block:          576 bytes
+Algorithm:                NONE
+Rollback Index:           0
+Flags:                    0
+Rollback Index Location:  0
+Release String:           'avbtool 1.3.0'
+Descriptors:
+    Hash descriptor:
+      Image Size:            2465792 bytes
+      Hash Algorithm:        sha256
+      Partition Name:        init_boot
+      Salt:                  24b5533e3f2b35a03c0eeb338753ed722c3408c209ac9111b72a9106da0ba08a
+      Digest:                5bc3b9be642c917cf2712414c1eed1079cb428f0981417838f06c91db036e818
+      Flags:                 0
+    Prop: com.android.build.init_boot.os_version -> '15'
+    Prop: com.android.build.init_boot.fingerprint -> 'Lenovo/TB322FC_PRC/TB322FC:15/AQ3A.250129.001/ZUXOS_1.1.11.263_251105_PRC:user/release-keys'
+    Prop: com.android.build.init_boot.security_patch -> '2025-02-05'
+
+[INFO] init_boot 是普通分区
+[INFO] 解析 vbmeta.img 信息
+[CMD] /Library/Frameworks/Python.framework/Versions/3.12/bin/python3 /Users/a77/Desktop/git/78boot/scripts/avbtool_host.py info_image --image vbmeta.img
+[OUTPUT]
+Minimum libavb version:   1.0
+Header Block:             256 bytes
+Authentication Block:     576 bytes
+Auxiliary Block:          7296 bytes
+Public key (sha1):        2597c218aae470a130f61162feaae70afd97f011
+Algorithm:                SHA256_RSA4096
+Rollback Index:           0
+Flags:                    0
+Rollback Index Location:  0
+Release String:           'avbtool 1.3.0'
+Descriptors:
+    Chain Partition descriptor:
+      Partition Name:          boot
+      Rollback Index Location: 3
+      Public key (sha1):       2597c218aae470a130f61162feaae70afd97f011
+      Flags:                   0
+    Chain Partition descriptor:
+      Partition Name:          recovery
+      Rollback Index Location: 1
+      Public key (sha1):       2597c218aae470a130f61162feaae70afd97f011
+      Flags:                   0
+    Chain Partition descriptor:
+      Partition Name:          vbmeta_system
+      Rollback Index Location: 2
+      Public key (sha1):       cdbb77177f731920bbe0a0f94f84d9038ae0617d
+      Flags:                   0
+    Prop: com.android.build.dtbo.fingerprint -> 'Lenovo/TB322FC_PRC/TB322FC:15/AQ3A.250129.001/ZUXOS_1.1.11.263_251105_PRC:user/release-keys'
+    Prop: com.android.build.init_boot.os_version -> '15'
+    Prop: com.android.build.init_boot.fingerprint -> 'Lenovo/TB322FC_PRC/TB322FC:15/AQ3A.250129.001/ZUXOS_1.1.11.263_251105_PRC:user/release-keys'
+    Prop: com.android.build.init_boot.security_patch -> '2025-02-05'
+    Prop: com.android.build.odm.os_version -> '15'
+    Prop: com.android.build.odm.fingerprint -> 'Lenovo/TB322FC_PRC/TB322FC:15/AQ3A.250129.001/ZUXOS_1.1.11.263_251105_PRC:user/release-keys'
+    Prop: com.android.build.system_dlkm.os_version -> '15'
+    Prop: com.android.build.system_dlkm.fingerprint -> 'Lenovo/TB322FC_PRC/TB322FC:15/AQ3A.250129.001/ZUXOS_1.1.11.263_251105_PRC:user/release-keys'
+    Prop: com.android.build.vendor.os_version -> '15'
+    Prop: com.android.build.vendor.fingerprint -> 'Lenovo/TB322FC_PRC/TB322FC:15/AQ3A.250129.001/ZUXOS_1.1.11.263_251105_PRC:user/release-keys'
+    Prop: com.android.build.vendor.security_patch -> '2025-02-05'
+    Prop: com.android.build.vendor_boot.fingerprint -> 'Lenovo/TB322FC_PRC/TB322FC:15/AQ3A.250129.001/ZUXOS_1.1.11.263_251105_PRC:user/release-keys'
+    Prop: com.android.build.vendor_dlkm.os_version -> '15'
+    Prop: com.android.build.vendor_dlkm.fingerprint -> 'Lenovo/TB322FC_PRC/TB322FC:15/AQ3A.250129.001/ZUXOS_1.1.11.263_251105_PRC:user/release-keys'
+    Hash descriptor:
+      Image Size:            23346967 bytes
+      Hash Algorithm:        sha256
+      Partition Name:        dtbo
+      Salt:                  24b5533e3f2b35a03c0eeb338753ed722c3408c209ac9111b72a9106da0ba08a
+      Digest:                2b5921e5d00df4c61aa614c4ae56f4cafe7bb4eb6b4db6e3e9ab7040b392e2e3
+      Flags:                 0
+    Hash descriptor:
+      Image Size:            2465792 bytes
+      Hash Algorithm:        sha256
+      Partition Name:        init_boot
+      Salt:                  24b5533e3f2b35a03c0eeb338753ed722c3408c209ac9111b72a9106da0ba08a
+      Digest:                5bc3b9be642c917cf2712414c1eed1079cb428f0981417838f06c91db036e818
+      Flags:                 0
+    Hash descriptor:
+      Image Size:            15122432 bytes
+      Hash Algorithm:        sha256
+      Partition Name:        vendor_boot
+      Salt:                  24b5533e3f2b35a03c0eeb338753ed722c3408c209ac9111b72a9106da0ba08a
+      Digest:                9823133cb1381ae0b0ac4abf9b6bfd01f91c3aff3e228c1d8ec4c3f0b17ee5fc
+      Flags:                 0
+    Hashtree descriptor:
+      Version of dm-verity:  1
+      Image Size:            1519616 bytes
+      Tree Offset:           1519616
+      Tree Size:             16384 bytes
+      Data Block Size:       4096 bytes
+      Hash Block Size:       4096 bytes
+      FEC num roots:         2
+      FEC offset:            1536000
+      FEC size:              16384 bytes
+      Hash Algorithm:        sha256
+      Partition Name:        odm
+      Salt:                  24b5533e3f2b35a03c0eeb338753ed722c3408c209ac9111b72a9106da0ba08a
+      Root Digest:           d2329923b2e31d850586c4e36e763bb0e59042e112feccd6263c689c79f52387
+      Flags:                 0
+    Hashtree descriptor:
+      Version of dm-verity:  1
+      Image Size:            12218368 bytes
+      Tree Offset:           12218368
+      Tree Size:             102400 bytes
+      Data Block Size:       4096 bytes
+      Hash Block Size:       4096 bytes
+      FEC num roots:         2
+      FEC offset:            12320768
+      FEC size:              98304 bytes
+      Hash Algorithm:        sha256
+      Partition Name:        system_dlkm
+      Salt:                  24b5533e3f2b35a03c0eeb338753ed722c3408c209ac9111b72a9106da0ba08a
+      Root Digest:           89f5dbe627c55a05e12b215abcaf910b8b6c1b7e5abce1e6ada162a97ebbaf75
+      Flags:                 0
+    Hashtree descriptor:
+      Version of dm-verity:  1
+      Image Size:            1510285312 bytes
+      Tree Offset:           1510285312
+      Tree Size:             11898880 bytes
+      Data Block Size:       4096 bytes
+      Hash Block Size:       4096 bytes
+      FEC num roots:         2
+      FEC offset:            1522184192
+      FEC size:              12034048 bytes
+      Hash Algorithm:        sha256
+      Partition Name:        vendor
+      Salt:                  24b5533e3f2b35a03c0eeb338753ed722c3408c209ac9111b72a9106da0ba08a
+      Root Digest:           e3adc3a5023f8e5b303aa6e7d0ea76ab144d1dc93b8a9d5cecf964eb9941b5cf
+      Flags:                 0
+    Hashtree descriptor:
+      Version of dm-verity:  1
+      Image Size:            144945152 bytes
+      Tree Offset:           144945152
+      Tree Size:             1150976 bytes
+      Data Block Size:       4096 bytes
+      Hash Block Size:       4096 bytes
+      FEC num roots:         2
+      FEC offset:            146096128
+      FEC size:              1155072 bytes
+      Hash Algorithm:        sha256
+      Partition Name:        vendor_dlkm
+      Salt:                  24b5533e3f2b35a03c0eeb338753ed722c3408c209ac9111b72a9106da0ba08a
+      Root Digest:           2ca43fe801e1287a9fe6929e0b16cd86cfbd6109a4f5c68736802a9d59c9b30b
+      Flags:                 0
+
+
+=== 重建分区: init_boot ===
+[INFO] 解析 init_boot.img 信息
+[CMD] /Library/Frameworks/Python.framework/Versions/3.12/bin/python3 /Users/a77/Desktop/git/78boot/scripts/avbtool_host.py info_image --image init_boot.img
+[OUTPUT]
+Footer version:           1.0
+Image size:               8388608 bytes
+Original image size:      2465792 bytes
+VBMeta offset:            2465792
+VBMeta size:              832 bytes
+--
+Minimum libavb version:   1.0
+Header Block:             256 bytes
+Authentication Block:     0 bytes
+Auxiliary Block:          576 bytes
+Algorithm:                NONE
+Rollback Index:           0
+Flags:                    0
+Rollback Index Location:  0
+Release String:           'avbtool 1.3.0'
+Descriptors:
+    Hash descriptor:
+      Image Size:            2465792 bytes
+      Hash Algorithm:        sha256
+      Partition Name:        init_boot
+      Salt:                  24b5533e3f2b35a03c0eeb338753ed722c3408c209ac9111b72a9106da0ba08a
+      Digest:                5bc3b9be642c917cf2712414c1eed1079cb428f0981417838f06c91db036e818
+      Flags:                 0
+    Prop: com.android.build.init_boot.os_version -> '15'
+    Prop: com.android.build.init_boot.fingerprint -> 'Lenovo/TB322FC_PRC/TB322FC:15/AQ3A.250129.001/ZUXOS_1.1.11.263_251105_PRC:user/release-keys'
+    Prop: com.android.build.init_boot.security_patch -> '2025-02-05'
+
+[INFO] 从当前镜像获取分区大小: 8388608 字节
+[INFO] 擦除 init_boot 的AVB footer
+[CMD] /Library/Frameworks/Python.framework/Versions/3.12/bin/python3 /Users/a77/Desktop/git/78boot/scripts/avbtool_host.py erase_footer --image init_boot.img
+[INFO] 重建普通hash分区 init_boot
+[INFO] 从当前镜像获取salt: 24b5533e3f2b35a0...
+[INFO] 发现分区属性: com.android.build.init_boot.os_version -> 15
+[INFO] 发现分区属性: com.android.build.init_boot.fingerprint -> Lenovo/TB322FC_PRC/TB322FC:15/AQ3A.250129.001/ZUXOS_1.1.11.263_251105_PRC:user/release-keys
+[INFO] 发现分区属性: com.android.build.init_boot.security_patch -> 2025-02-05
+[INFO] 为普通分区 init_boot 添加hash footer
+[CMD] /Library/Frameworks/Python.framework/Versions/3.12/bin/python3 /Users/a77/Desktop/git/78boot/scripts/avbtool_host.py add_hash_footer --image init_boot.img --partition_name init_boot --partition_size 8388608 --algorithm NONE --salt 24b5533e3f2b35a03c0eeb338753ed722c3408c209ac9111b72a9106da0ba08a --prop com.android.build.init_boot.os_version:15 --prop com.android.build.init_boot.fingerprint:Lenovo/TB322FC_PRC/TB322FC:15/AQ3A.250129.001/ZUXOS_1.1.11.263_251105_PRC:user/release-keys --prop com.android.build.init_boot.security_patch:2025-02-05
+[SUCCESS] 普通分区 init_boot 重建成功
+
+=== 重建vbmeta镜像 ===
+[INFO] 解析 backup_20261009_233947/vbmeta.img 信息
+[CMD] /Library/Frameworks/Python.framework/Versions/3.12/bin/python3 /Users/a77/Desktop/git/78boot/scripts/avbtool_host.py info_image --image backup_20261009_233947/vbmeta.img
+[OUTPUT]
+Minimum libavb version:   1.0
+Header Block:             256 bytes
+Authentication Block:     576 bytes
+Auxiliary Block:          7296 bytes
+Public key (sha1):        2597c218aae470a130f61162feaae70afd97f011
+Algorithm:                SHA256_RSA4096
+Rollback Index:           0
+Flags:                    0
+Rollback Index Location:  0
+Release String:           'avbtool 1.3.0'
+Descriptors:
+    Chain Partition descriptor:
+      Partition Name:          boot
+      Rollback Index Location: 3
+      Public key (sha1):       2597c218aae470a130f61162feaae70afd97f011
+      Flags:                   0
+    Chain Partition descriptor:
+      Partition Name:          recovery
+      Rollback Index Location: 1
+      Public key (sha1):       2597c218aae470a130f61162feaae70afd97f011
+      Flags:                   0
+    Chain Partition descriptor:
+      Partition Name:          vbmeta_system
+      Rollback Index Location: 2
+      Public key (sha1):       cdbb77177f731920bbe0a0f94f84d9038ae0617d
+      Flags:                   0
+    Prop: com.android.build.dtbo.fingerprint -> 'Lenovo/TB322FC_PRC/TB322FC:15/AQ3A.250129.001/ZUXOS_1.1.11.263_251105_PRC:user/release-keys'
+    Prop: com.android.build.init_boot.os_version -> '15'
+    Prop: com.android.build.init_boot.fingerprint -> 'Lenovo/TB322FC_PRC/TB322FC:15/AQ3A.250129.001/ZUXOS_1.1.11.263_251105_PRC:user/release-keys'
+    Prop: com.android.build.init_boot.security_patch -> '2025-02-05'
+    Prop: com.android.build.odm.os_version -> '15'
+    Prop: com.android.build.odm.fingerprint -> 'Lenovo/TB322FC_PRC/TB322FC:15/AQ3A.250129.001/ZUXOS_1.1.11.263_251105_PRC:user/release-keys'
+    Prop: com.android.build.system_dlkm.os_version -> '15'
+    Prop: com.android.build.system_dlkm.fingerprint -> 'Lenovo/TB322FC_PRC/TB322FC:15/AQ3A.250129.001/ZUXOS_1.1.11.263_251105_PRC:user/release-keys'
+    Prop: com.android.build.vendor.os_version -> '15'
+    Prop: com.android.build.vendor.fingerprint -> 'Lenovo/TB322FC_PRC/TB322FC:15/AQ3A.250129.001/ZUXOS_1.1.11.263_251105_PRC:user/release-keys'
+    Prop: com.android.build.vendor.security_patch -> '2025-02-05'
+    Prop: com.android.build.vendor_boot.fingerprint -> 'Lenovo/TB322FC_PRC/TB322FC:15/AQ3A.250129.001/ZUXOS_1.1.11.263_251105_PRC:user/release-keys'
+    Prop: com.android.build.vendor_dlkm.os_version -> '15'
+    Prop: com.android.build.vendor_dlkm.fingerprint -> 'Lenovo/TB322FC_PRC/TB322FC:15/AQ3A.250129.001/ZUXOS_1.1.11.263_251105_PRC:user/release-keys'
+    Hash descriptor:
+      Image Size:            23346967 bytes
+      Hash Algorithm:        sha256
+      Partition Name:        dtbo
+      Salt:                  24b5533e3f2b35a03c0eeb338753ed722c3408c209ac9111b72a9106da0ba08a
+      Digest:                2b5921e5d00df4c61aa614c4ae56f4cafe7bb4eb6b4db6e3e9ab7040b392e2e3
+      Flags:                 0
+    Hash descriptor:
+      Image Size:            2465792 bytes
+      Hash Algorithm:        sha256
+      Partition Name:        init_boot
+      Salt:                  24b5533e3f2b35a03c0eeb338753ed722c3408c209ac9111b72a9106da0ba08a
+      Digest:                5bc3b9be642c917cf2712414c1eed1079cb428f0981417838f06c91db036e818
+      Flags:                 0
+    Hash descriptor:
+      Image Size:            15122432 bytes
+      Hash Algorithm:        sha256
+      Partition Name:        vendor_boot
+      Salt:                  24b5533e3f2b35a03c0eeb338753ed722c3408c209ac9111b72a9106da0ba08a
+      Digest:                9823133cb1381ae0b0ac4abf9b6bfd01f91c3aff3e228c1d8ec4c3f0b17ee5fc
+      Flags:                 0
+    Hashtree descriptor:
+      Version of dm-verity:  1
+      Image Size:            1519616 bytes
+      Tree Offset:           1519616
+      Tree Size:             16384 bytes
+      Data Block Size:       4096 bytes
+      Hash Block Size:       4096 bytes
+      FEC num roots:         2
+      FEC offset:            1536000
+      FEC size:              16384 bytes
+      Hash Algorithm:        sha256
+      Partition Name:        odm
+      Salt:                  24b5533e3f2b35a03c0eeb338753ed722c3408c209ac9111b72a9106da0ba08a
+      Root Digest:           d2329923b2e31d850586c4e36e763bb0e59042e112feccd6263c689c79f52387
+      Flags:                 0
+    Hashtree descriptor:
+      Version of dm-verity:  1
+      Image Size:            12218368 bytes
+      Tree Offset:           12218368
+      Tree Size:             102400 bytes
+      Data Block Size:       4096 bytes
+      Hash Block Size:       4096 bytes
+      FEC num roots:         2
+      FEC offset:            12320768
+      FEC size:              98304 bytes
+      Hash Algorithm:        sha256
+      Partition Name:        system_dlkm
+      Salt:                  24b5533e3f2b35a03c0eeb338753ed722c3408c209ac9111b72a9106da0ba08a
+      Root Digest:           89f5dbe627c55a05e12b215abcaf910b8b6c1b7e5abce1e6ada162a97ebbaf75
+      Flags:                 0
+    Hashtree descriptor:
+      Version of dm-verity:  1
+      Image Size:            1510285312 bytes
+      Tree Offset:           1510285312
+      Tree Size:             11898880 bytes
+      Data Block Size:       4096 bytes
+      Hash Block Size:       4096 bytes
+      FEC num roots:         2
+      FEC offset:            1522184192
+      FEC size:              12034048 bytes
+      Hash Algorithm:        sha256
+      Partition Name:        vendor
+      Salt:                  24b5533e3f2b35a03c0eeb338753ed722c3408c209ac9111b72a9106da0ba08a
+      Root Digest:           e3adc3a5023f8e5b303aa6e7d0ea76ab144d1dc93b8a9d5cecf964eb9941b5cf
+      Flags:                 0
+    Hashtree descriptor:
+      Version of dm-verity:  1
+      Image Size:            144945152 bytes
+      Tree Offset:           144945152
+      Tree Size:             1150976 bytes
+      Data Block Size:       4096 bytes
+      Hash Block Size:       4096 bytes
+      FEC num roots:         2
+      FEC offset:            146096128
+      FEC size:              1155072 bytes
+      Hash Algorithm:        sha256
+      Partition Name:        vendor_dlkm
+      Salt:                  24b5533e3f2b35a03c0eeb338753ed722c3408c209ac9111b72a9106da0ba08a
+      Root Digest:           2ca43fe801e1287a9fe6929e0b16cd86cfbd6109a4f5c68736802a9d59c9b30b
+      Flags:                 0
+
+[INFO] 使用手动指定的私钥: /Users/a77/Desktop/git/78boot/签名工具/avb/tools/pem/testkey_rsa4096.pem
+[INFO] 生成新的vbmeta镜像
+[CMD] /Library/Frameworks/Python.framework/Versions/3.12/bin/python3 /Users/a77/Desktop/git/78boot/scripts/avbtool_host.py make_vbmeta_image --output vbmeta_new.img --algorithm SHA256_RSA4096 --key /Users/a77/Desktop/git/78boot/签名工具/avb/tools/pem/testkey_rsa4096.pem --rollback_index 0 --flags 0 --rollback_index_location 0 --padding_size 4096 --include_descriptors_from_image backup_20261009_233947/vbmeta.img --include_descriptors_from_image init_boot.img
+[SUCCESS] vbmeta.img 重建成功
+
+=== 验证重建结果 ===
+
+[验证] 新的vbmeta.img:
+[INFO] 解析 vbmeta.img 信息
+[CMD] /Library/Frameworks/Python.framework/Versions/3.12/bin/python3 /Users/a77/Desktop/git/78boot/scripts/avbtool_host.py info_image --image vbmeta.img
+[OUTPUT]
+Minimum libavb version:   1.0
+Header Block:             256 bytes
+Authentication Block:     576 bytes
+Auxiliary Block:          7616 bytes
+Public key (sha1):        2597c218aae470a130f61162feaae70afd97f011
+Algorithm:                SHA256_RSA4096
+Rollback Index:           0
+Flags:                    0
+Rollback Index Location:  0
+Release String:           'avbtool 1.3.0'
+Descriptors:
+    Prop: com.android.build.dtbo.fingerprint -> 'Lenovo/TB322FC_PRC/TB322FC:15/AQ3A.250129.001/ZUXOS_1.1.11.263_251105_PRC:user/release-keys'
+    Prop: com.android.build.init_boot.os_version -> '15'
+    Prop: com.android.build.init_boot.fingerprint -> 'Lenovo/TB322FC_PRC/TB322FC:15/AQ3A.250129.001/ZUXOS_1.1.11.263_251105_PRC:user/release-keys'
+    Prop: com.android.build.init_boot.security_patch -> '2025-02-05'
+    Prop: com.android.build.odm.os_version -> '15'
+    Prop: com.android.build.odm.fingerprint -> 'Lenovo/TB322FC_PRC/TB322FC:15/AQ3A.250129.001/ZUXOS_1.1.11.263_251105_PRC:user/release-keys'
+    Prop: com.android.build.system_dlkm.os_version -> '15'
+    Prop: com.android.build.system_dlkm.fingerprint -> 'Lenovo/TB322FC_PRC/TB322FC:15/AQ3A.250129.001/ZUXOS_1.1.11.263_251105_PRC:user/release-keys'
+    Prop: com.android.build.vendor.os_version -> '15'
+    Prop: com.android.build.vendor.fingerprint -> 'Lenovo/TB322FC_PRC/TB322FC:15/AQ3A.250129.001/ZUXOS_1.1.11.263_251105_PRC:user/release-keys'
+    Prop: com.android.build.vendor.security_patch -> '2025-02-05'
+    Prop: com.android.build.vendor_boot.fingerprint -> 'Lenovo/TB322FC_PRC/TB322FC:15/AQ3A.250129.001/ZUXOS_1.1.11.263_251105_PRC:user/release-keys'
+    Prop: com.android.build.vendor_dlkm.os_version -> '15'
+    Prop: com.android.build.vendor_dlkm.fingerprint -> 'Lenovo/TB322FC_PRC/TB322FC:15/AQ3A.250129.001/ZUXOS_1.1.11.263_251105_PRC:user/release-keys'
+    Prop: com.android.build.init_boot.os_version -> '15'
+    Prop: com.android.build.init_boot.fingerprint -> 'Lenovo/TB322FC_PRC/TB322FC:15/AQ3A.250129.001/ZUXOS_1.1.11.263_251105_PRC:user/release-keys'
+    Prop: com.android.build.init_boot.security_patch -> '2025-02-05'
+    Chain Partition descriptor:
+      Partition Name:          boot
+      Rollback Index Location: 3
+      Public key (sha1):       2597c218aae470a130f61162feaae70afd97f011
+      Flags:                   0
+    Chain Partition descriptor:
+      Partition Name:          recovery
+      Rollback Index Location: 1
+      Public key (sha1):       2597c218aae470a130f61162feaae70afd97f011
+      Flags:                   0
+    Chain Partition descriptor:
+      Partition Name:          vbmeta_system
+      Rollback Index Location: 2
+      Public key (sha1):       cdbb77177f731920bbe0a0f94f84d9038ae0617d
+      Flags:                   0
+    Hash descriptor:
+      Image Size:            23346967 bytes
+      Hash Algorithm:        sha256
+      Partition Name:        dtbo
+      Salt:                  24b5533e3f2b35a03c0eeb338753ed722c3408c209ac9111b72a9106da0ba08a
+      Digest:                2b5921e5d00df4c61aa614c4ae56f4cafe7bb4eb6b4db6e3e9ab7040b392e2e3
+      Flags:                 0
+    Hash descriptor:
+      Image Size:            2465792 bytes
+      Hash Algorithm:        sha256
+      Partition Name:        init_boot
+      Salt:                  24b5533e3f2b35a03c0eeb338753ed722c3408c209ac9111b72a9106da0ba08a
+      Digest:                5bc3b9be642c917cf2712414c1eed1079cb428f0981417838f06c91db036e818
+      Flags:                 0
+    Hash descriptor:
+      Image Size:            15122432 bytes
+      Hash Algorithm:        sha256
+      Partition Name:        vendor_boot
+      Salt:                  24b5533e3f2b35a03c0eeb338753ed722c3408c209ac9111b72a9106da0ba08a
+      Digest:                9823133cb1381ae0b0ac4abf9b6bfd01f91c3aff3e228c1d8ec4c3f0b17ee5fc
+      Flags:                 0
+    Hashtree descriptor:
+      Version of dm-verity:  1
+      Image Size:            1519616 bytes
+      Tree Offset:           1519616
+      Tree Size:             16384 bytes
+      Data Block Size:       4096 bytes
+      Hash Block Size:       4096 bytes
+      FEC num roots:         2
+      FEC offset:            1536000
+      FEC size:              16384 bytes
+      Hash Algorithm:        sha256
+      Partition Name:        odm
+      Salt:                  24b5533e3f2b35a03c0eeb338753ed722c3408c209ac9111b72a9106da0ba08a
+      Root Digest:           d2329923b2e31d850586c4e36e763bb0e59042e112feccd6263c689c79f52387
+      Flags:                 0
+    Hashtree descriptor:
+      Version of dm-verity:  1
+      Image Size:            12218368 bytes
+      Tree Offset:           12218368
+      Tree Size:             102400 bytes
+      Data Block Size:       4096 bytes
+      Hash Block Size:       4096 bytes
+      FEC num roots:         2
+      FEC offset:            12320768
+      FEC size:              98304 bytes
+      Hash Algorithm:        sha256
+      Partition Name:        system_dlkm
+      Salt:                  24b5533e3f2b35a03c0eeb338753ed722c3408c209ac9111b72a9106da0ba08a
+      Root Digest:           89f5dbe627c55a05e12b215abcaf910b8b6c1b7e5abce1e6ada162a97ebbaf75
+      Flags:                 0
+    Hashtree descriptor:
+      Version of dm-verity:  1
+      Image Size:            1510285312 bytes
+      Tree Offset:           1510285312
+      Tree Size:             11898880 bytes
+      Data Block Size:       4096 bytes
+      Hash Block Size:       4096 bytes
+      FEC num roots:         2
+      FEC offset:            1522184192
+      FEC size:              12034048 bytes
+      Hash Algorithm:        sha256
+      Partition Name:        vendor
+      Salt:                  24b5533e3f2b35a03c0eeb338753ed722c3408c209ac9111b72a9106da0ba08a
+      Root Digest:           e3adc3a5023f8e5b303aa6e7d0ea76ab144d1dc93b8a9d5cecf964eb9941b5cf
+      Flags:                 0
+    Hashtree descriptor:
+      Version of dm-verity:  1
+      Image Size:            144945152 bytes
+      Tree Offset:           144945152
+      Tree Size:             1150976 bytes
+      Data Block Size:       4096 bytes
+      Hash Block Size:       4096 bytes
+      FEC num roots:         2
+      FEC offset:            146096128
+      FEC size:              1155072 bytes
+      Hash Algorithm:        sha256
+      Partition Name:        vendor_dlkm
+      Salt:                  24b5533e3f2b35a03c0eeb338753ed722c3408c209ac9111b72a9106da0ba08a
+      Root Digest:           2ca43fe801e1287a9fe6929e0b16cd86cfbd6109a4f5c68736802a9d59c9b30b
+      Flags:                 0
+
+[检测] 发现分区镜像: init_boot -> init_boot.img
+
+[验证] init_boot.img:
+[INFO] 解析 init_boot.img 信息
+[CMD] /Library/Frameworks/Python.framework/Versions/3.12/bin/python3 /Users/a77/Desktop/git/78boot/scripts/avbtool_host.py info_image --image init_boot.img
+[OUTPUT]
+Footer version:           1.0
+Image size:               8388608 bytes
+Original image size:      2465792 bytes
+VBMeta offset:            2465792
+VBMeta size:              832 bytes
+--
+Minimum libavb version:   1.0
+Header Block:             256 bytes
+Authentication Block:     0 bytes
+Auxiliary Block:          576 bytes
+Algorithm:                NONE
+Rollback Index:           0
+Flags:                    0
+Rollback Index Location:  0
+Release String:           'avbtool 1.3.0'
+Descriptors:
+    Hash descriptor:
+      Image Size:            2465792 bytes
+      Hash Algorithm:        sha256
+      Partition Name:        init_boot
+      Salt:                  24b5533e3f2b35a03c0eeb338753ed722c3408c209ac9111b72a9106da0ba08a
+      Digest:                5bc3b9be642c917cf2712414c1eed1079cb428f0981417838f06c91db036e818
+      Flags:                 0
+    Prop: com.android.build.init_boot.os_version -> '15'
+    Prop: com.android.build.init_boot.fingerprint -> 'Lenovo/TB322FC_PRC/TB322FC:15/AQ3A.250129.001/ZUXOS_1.1.11.263_251105_PRC:user/release-keys'
+    Prop: com.android.build.init_boot.security_patch -> '2025-02-05'
+
+
+=== 重建完成 ===
+备份文件位于: backup_20261009_233947/
+成功重建了 1 个分区
+vbmeta.img生成成功

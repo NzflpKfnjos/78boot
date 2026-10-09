@@ -1,0 +1,14 @@
+{
+  "command": [
+    "/tmp/78boot-7zip-tool/7zz",
+    "x",
+    "-y",
+    "-bd",
+    "-bb0",
+    "-o/Users/a77/Desktop/git/78boot/签名工具/avb",
+    "/Users/a77/Desktop/git/78boot/签名工具/avb签名工具.rar"
+  ],
+  "stdout": "\n7-Zip (z) 25.01 (arm64) : Copyright (c) 1999-2025 Igor Pavlov : 2025-08-03\n 64-bit arm_v:8.5-A locale=C.UTF-8 Threads:10 OPEN_MAX:1048575, ASM\n\nScanning the drive for archives:\n1 file, 8210038 bytes (8018 KiB)\n\nExtracting archive: /Users/a77/Desktop/git/78boot/签名工具/avb签名工具.rar\n--\nPath = /Users/a77/Desktop/git/78boot/签名工具/avb签名工具.rar\nType = Rar5\nPhysical Size = 8210038\nCharacteristics = Locator QuickOpen:8206883\nEncrypted = -\nSolid = -\nBlocks = 53\nMethod = v6:4M:m0:m3\nMultivolume = -\nVolumes = 1\n\nEverything is Ok\n\nFolders: 5\nFiles: 48\nSize:       19037390\nCompressed: 8210038\n",
+  "stderr": "",
+  "exit_status": 0
+}

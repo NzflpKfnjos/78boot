@@ -1,0 +1,16 @@
+{
+  "command": [
+    "git",
+    "clone",
+    "--depth",
+    "1",
+    "--single-branch",
+    "--branch",
+    "main",
+    "https://github.com/tiann/KernelSU.git",
+    "/Users/a77/Desktop/git/78boot/upstream/KernelSU"
+  ],
+  "stdout": "",
+  "stderr": "Cloning into '/Users/a77/Desktop/git/78boot/upstream/KernelSU'...\n",
+  "exit_status": 0
+}

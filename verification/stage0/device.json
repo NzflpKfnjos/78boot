@@ -1,0 +1,16 @@
+{
+  "state": "no-authorized-device",
+  "records": [
+    {
+      "command": [
+        "/opt/homebrew/bin/adb",
+        "devices",
+        "-l"
+      ],
+      "input": null,
+      "stdout": "List of devices attached\n\n",
+      "stderr": "",
+      "exit_status": 0
+    }
+  ]
+}

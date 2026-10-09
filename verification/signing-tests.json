@@ -1,0 +1,288 @@
+{
+  "result": "passed",
+  "device_boot_verified": false,
+  "original_hashes_unchanged": {
+    "boot.img": "ec05dcf7ad951c3672cbd8bb20379aec45632faa13f7fe439330e950de0b7f4d",
+    "init_boot.img": "46462e73cd604df84676f225e614539d7695ad295236d40f231b5f4fe9c1cd8f",
+    "vbmeta.img": "91b3e5fb7d41c16af0ab530197f6e16d52266de969f27aa5ceea145881b8400e"
+  },
+  "test_changes": "one command-line byte in copies; these are test images, not root builds",
+  "records": [
+    {
+      "name": "boot-stock-valid",
+      "command": [
+        "/Library/Frameworks/Python.framework/Versions/3.12/bin/python3",
+        "/Users/a77/Desktop/git/78boot/scripts/avbtool_host.py",
+        "verify_image",
+        "--image",
+        "/Users/a77/Desktop/git/78boot/y700/TB322_ZUXOS_1.1.11.263_Tool/image/boot.img"
+      ],
+      "input": null,
+      "stdout": "Verifying image /Users/a77/Desktop/git/78boot/y700/TB322_ZUXOS_1.1.11.263_Tool/image/boot.img using embedded public key\nvbmeta: Successfully verified footer and SHA256_RSA4096 vbmeta struct in /Users/a77/Desktop/git/78boot/y700/TB322_ZUXOS_1.1.11.263_Tool/image/boot.img\nboot: Successfully verified sha256 hash of /Users/a77/Desktop/git/78boot/y700/TB322_ZUXOS_1.1.11.263_Tool/image/boot.img for image of 36483072 bytes\n",
+      "stderr": "",
+      "exit_status": 0
+    },
+    {
+      "name": "boot-BASELINE-unsigned-copy-rejected",
+      "command": [
+        "/Library/Frameworks/Python.framework/Versions/3.12/bin/python3",
+        "/Users/a77/Desktop/git/78boot/scripts/avbtool_host.py",
+        "verify_image",
+        "--image",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/avb-copy-test-lodkcxz_/boot.img"
+      ],
+      "input": null,
+      "stdout": "Verifying image /var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/avb-copy-test-lodkcxz_/boot.img using embedded public key\nvbmeta: Successfully verified footer and SHA256_RSA4096 vbmeta struct in /var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/avb-copy-test-lodkcxz_/boot.img\n",
+      "stderr": "sha256 digest of /var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/avb-copy-test-lodkcxz_/boot.img does not match digest in descriptor\n/Users/a77/Desktop/git/78boot/scripts/avbtool_host.py: Error verifying descriptor.\n",
+      "exit_status": 1
+    },
+    {
+      "name": "boot-signing",
+      "command": [
+        "/Library/Frameworks/Python.framework/Versions/3.12/bin/python3",
+        "/Users/a77/Desktop/git/78boot/scripts/sign_images.py",
+        "--boot",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/avb-copy-test-lodkcxz_/boot.img",
+        "--output",
+        "/Users/a77/Desktop/git/78boot/verification/signing-smoke/boot"
+      ],
+      "input": null,
+      "stdout": "Verified signed output: /Users/a77/Desktop/git/78boot/verification/signing-smoke/boot/manifest.json\n",
+      "stderr": "",
+      "exit_status": 0
+    },
+    {
+      "name": "boot-MODIFIED-signed-copy-valid",
+      "command": [
+        "/Library/Frameworks/Python.framework/Versions/3.12/bin/python3",
+        "/Users/a77/Desktop/git/78boot/scripts/avbtool_host.py",
+        "verify_image",
+        "--image",
+        "/Users/a77/Desktop/git/78boot/verification/signing-smoke/boot/boot.img"
+      ],
+      "input": null,
+      "stdout": "Verifying image /Users/a77/Desktop/git/78boot/verification/signing-smoke/boot/boot.img using embedded public key\nvbmeta: Successfully verified footer and SHA256_RSA4096 vbmeta struct in /Users/a77/Desktop/git/78boot/verification/signing-smoke/boot/boot.img\nboot: Successfully verified sha256 hash of /Users/a77/Desktop/git/78boot/verification/signing-smoke/boot/boot.img for image of 36483072 bytes\n",
+      "stderr": "",
+      "exit_status": 0
+    },
+    {
+      "name": "boot-overwrite-rejected",
+      "command": [
+        "/Library/Frameworks/Python.framework/Versions/3.12/bin/python3",
+        "/Users/a77/Desktop/git/78boot/scripts/sign_images.py",
+        "--boot",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/avb-copy-test-lodkcxz_/boot.img",
+        "--output",
+        "/Users/a77/Desktop/git/78boot/verification/signing-smoke/boot"
+      ],
+      "input": null,
+      "stdout": "",
+      "stderr": "sign-images: output already exists\n",
+      "exit_status": 1
+    },
+    {
+      "name": "boot-rollback-command",
+      "command": [
+        "/Users/a77/Desktop/git/78boot/verification/signing-smoke/boot/ROLLBACK.sh",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/avb-copy-test-lodkcxz_/rollback/boot.img"
+      ],
+      "input": null,
+      "stdout": "Restored pre-signing bytes: /var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/avb-copy-test-lodkcxz_/rollback/boot.img\n",
+      "stderr": "",
+      "exit_status": 0
+    },
+    {
+      "name": "boot-ROLLBACK-pre-signing-copy-rejected",
+      "command": [
+        "/Library/Frameworks/Python.framework/Versions/3.12/bin/python3",
+        "/Users/a77/Desktop/git/78boot/scripts/avbtool_host.py",
+        "verify_image",
+        "--image",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/avb-copy-test-lodkcxz_/rollback/boot.img"
+      ],
+      "input": null,
+      "stdout": "Verifying image /var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/avb-copy-test-lodkcxz_/rollback/boot.img using embedded public key\nvbmeta: Successfully verified footer and SHA256_RSA4096 vbmeta struct in /var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/avb-copy-test-lodkcxz_/rollback/boot.img\n",
+      "stderr": "sha256 digest of /var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/avb-copy-test-lodkcxz_/rollback/boot.img does not match digest in descriptor\n/Users/a77/Desktop/git/78boot/scripts/avbtool_host.py: Error verifying descriptor.\n",
+      "exit_status": 1
+    },
+    {
+      "name": "init_boot-stock-valid",
+      "command": [
+        "/Library/Frameworks/Python.framework/Versions/3.12/bin/python3",
+        "/Users/a77/Desktop/git/78boot/scripts/avbtool_host.py",
+        "verify_image",
+        "--image",
+        "/Users/a77/Desktop/git/78boot/y700/TB322_ZUXOS_1.1.11.263_Tool/image/init_boot.img"
+      ],
+      "input": null,
+      "stdout": "Verifying image /Users/a77/Desktop/git/78boot/y700/TB322_ZUXOS_1.1.11.263_Tool/image/init_boot.img using embedded public key\nvbmeta: Successfully verified footer and NONE vbmeta struct in /Users/a77/Desktop/git/78boot/y700/TB322_ZUXOS_1.1.11.263_Tool/image/init_boot.img\ninit_boot: Successfully verified sha256 hash of /Users/a77/Desktop/git/78boot/y700/TB322_ZUXOS_1.1.11.263_Tool/image/init_boot.img for image of 2465792 bytes\n",
+      "stderr": "",
+      "exit_status": 0
+    },
+    {
+      "name": "init_boot-BASELINE-unsigned-copy-rejected",
+      "command": [
+        "/Library/Frameworks/Python.framework/Versions/3.12/bin/python3",
+        "/Users/a77/Desktop/git/78boot/scripts/avbtool_host.py",
+        "verify_image",
+        "--image",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/avb-copy-test-lodkcxz_/init_boot.img"
+      ],
+      "input": null,
+      "stdout": "Verifying image /var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/avb-copy-test-lodkcxz_/init_boot.img using embedded public key\nvbmeta: Successfully verified footer and NONE vbmeta struct in /var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/avb-copy-test-lodkcxz_/init_boot.img\n",
+      "stderr": "sha256 digest of /var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/avb-copy-test-lodkcxz_/init_boot.img does not match digest in descriptor\n/Users/a77/Desktop/git/78boot/scripts/avbtool_host.py: Error verifying descriptor.\n",
+      "exit_status": 1
+    },
+    {
+      "name": "missing-vbmeta-rejected",
+      "command": [
+        "/Library/Frameworks/Python.framework/Versions/3.12/bin/python3",
+        "/Users/a77/Desktop/git/78boot/scripts/sign_images.py",
+        "--init-boot",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/avb-copy-test-lodkcxz_/init_boot.img",
+        "--output",
+        "/Users/a77/Desktop/git/78boot/verification/signing-smoke/missing-vbmeta"
+      ],
+      "input": null,
+      "stdout": "",
+      "stderr": "sign-images: hash-only partition requires matching --vbmeta\n",
+      "exit_status": 1
+    },
+    {
+      "name": "init_boot-signing",
+      "command": [
+        "/Library/Frameworks/Python.framework/Versions/3.12/bin/python3",
+        "/Users/a77/Desktop/git/78boot/scripts/sign_images.py",
+        "--init-boot",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/avb-copy-test-lodkcxz_/init_boot.img",
+        "--output",
+        "/Users/a77/Desktop/git/78boot/verification/signing-smoke/init_boot",
+        "--vbmeta",
+        "/Users/a77/Desktop/git/78boot/y700/TB322_ZUXOS_1.1.11.263_Tool/image/vbmeta.img"
+      ],
+      "input": null,
+      "stdout": "Verified signed output: /Users/a77/Desktop/git/78boot/verification/signing-smoke/init_boot/manifest.json\n",
+      "stderr": "",
+      "exit_status": 0
+    },
+    {
+      "name": "init_boot-MODIFIED-signed-copy-valid",
+      "command": [
+        "/Library/Frameworks/Python.framework/Versions/3.12/bin/python3",
+        "/Users/a77/Desktop/git/78boot/scripts/avbtool_host.py",
+        "verify_image",
+        "--image",
+        "/Users/a77/Desktop/git/78boot/verification/signing-smoke/init_boot/init_boot.img"
+      ],
+      "input": null,
+      "stdout": "Verifying image /Users/a77/Desktop/git/78boot/verification/signing-smoke/init_boot/init_boot.img using embedded public key\nvbmeta: Successfully verified footer and NONE vbmeta struct in /Users/a77/Desktop/git/78boot/verification/signing-smoke/init_boot/init_boot.img\ninit_boot: Successfully verified sha256 hash of /Users/a77/Desktop/git/78boot/verification/signing-smoke/init_boot/init_boot.img for image of 2465792 bytes\n",
+      "stderr": "",
+      "exit_status": 0
+    },
+    {
+      "name": "init_boot-overwrite-rejected",
+      "command": [
+        "/Library/Frameworks/Python.framework/Versions/3.12/bin/python3",
+        "/Users/a77/Desktop/git/78boot/scripts/sign_images.py",
+        "--init-boot",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/avb-copy-test-lodkcxz_/init_boot.img",
+        "--output",
+        "/Users/a77/Desktop/git/78boot/verification/signing-smoke/init_boot",
+        "--vbmeta",
+        "/Users/a77/Desktop/git/78boot/y700/TB322_ZUXOS_1.1.11.263_Tool/image/vbmeta.img"
+      ],
+      "input": null,
+      "stdout": "",
+      "stderr": "sign-images: output already exists\n",
+      "exit_status": 1
+    },
+    {
+      "name": "init_boot-rollback-command",
+      "command": [
+        "/Users/a77/Desktop/git/78boot/verification/signing-smoke/init_boot/ROLLBACK.sh",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/avb-copy-test-lodkcxz_/rollback/init_boot.img"
+      ],
+      "input": null,
+      "stdout": "Restored pre-signing bytes: /var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/avb-copy-test-lodkcxz_/rollback/init_boot.img\n",
+      "stderr": "",
+      "exit_status": 0
+    },
+    {
+      "name": "init_boot-ROLLBACK-pre-signing-copy-rejected",
+      "command": [
+        "/Library/Frameworks/Python.framework/Versions/3.12/bin/python3",
+        "/Users/a77/Desktop/git/78boot/scripts/avbtool_host.py",
+        "verify_image",
+        "--image",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/avb-copy-test-lodkcxz_/rollback/init_boot.img"
+      ],
+      "input": null,
+      "stdout": "Verifying image /var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/avb-copy-test-lodkcxz_/rollback/init_boot.img using embedded public key\nvbmeta: Successfully verified footer and NONE vbmeta struct in /var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/avb-copy-test-lodkcxz_/rollback/init_boot.img\n",
+      "stderr": "sha256 digest of /var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/avb-copy-test-lodkcxz_/rollback/init_boot.img does not match digest in descriptor\n/Users/a77/Desktop/git/78boot/scripts/avbtool_host.py: Error verifying descriptor.\n",
+      "exit_status": 1
+    },
+    {
+      "name": "patched-footer-preparation",
+      "command": [
+        "/Library/Frameworks/Python.framework/Versions/3.12/bin/python3",
+        "/Users/a77/Desktop/git/78boot/scripts/prepare_avb_input.py",
+        "--stock",
+        "/Users/a77/Desktop/git/78boot/y700/TB322_ZUXOS_1.1.11.263_Tool/image/init_boot.img",
+        "--patched",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/avb-copy-test-lodkcxz_/raw-init_boot.img",
+        "--output",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/avb-copy-test-lodkcxz_/prepared-init_boot.img"
+      ],
+      "input": null,
+      "stdout": "Unsigned intermediate (signing required): /var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/avb-copy-test-lodkcxz_/prepared-init_boot.img\npatched_payload_bytes=2465792 sha256=c21d811b371e8ebd9b8394850335bb9cbada26e5d0a64185558053a981f13959\n",
+      "stderr": "",
+      "exit_status": 0
+    },
+    {
+      "name": "prepared-image-signing",
+      "command": [
+        "/Library/Frameworks/Python.framework/Versions/3.12/bin/python3",
+        "/Users/a77/Desktop/git/78boot/scripts/sign_images.py",
+        "--init-boot",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/avb-copy-test-lodkcxz_/prepared-init_boot.img",
+        "--vbmeta",
+        "/Users/a77/Desktop/git/78boot/y700/TB322_ZUXOS_1.1.11.263_Tool/image/vbmeta.img",
+        "--output",
+        "/Users/a77/Desktop/git/78boot/verification/signing-smoke/prepared"
+      ],
+      "input": null,
+      "stdout": "Verified signed output: /Users/a77/Desktop/git/78boot/verification/signing-smoke/prepared/manifest.json\n",
+      "stderr": "",
+      "exit_status": 0
+    },
+    {
+      "name": "prepared-image-signature-valid",
+      "command": [
+        "/Library/Frameworks/Python.framework/Versions/3.12/bin/python3",
+        "/Users/a77/Desktop/git/78boot/scripts/avbtool_host.py",
+        "verify_image",
+        "--image",
+        "/Users/a77/Desktop/git/78boot/verification/signing-smoke/prepared/init_boot.img"
+      ],
+      "input": null,
+      "stdout": "Verifying image /Users/a77/Desktop/git/78boot/verification/signing-smoke/prepared/init_boot.img using embedded public key\nvbmeta: Successfully verified footer and NONE vbmeta struct in /Users/a77/Desktop/git/78boot/verification/signing-smoke/prepared/init_boot.img\ninit_boot: Successfully verified sha256 hash of /Users/a77/Desktop/git/78boot/verification/signing-smoke/prepared/init_boot.img for image of 2465792 bytes\n",
+      "stderr": "",
+      "exit_status": 0
+    },
+    {
+      "name": "wrong-partition-rejected",
+      "command": [
+        "/Library/Frameworks/Python.framework/Versions/3.12/bin/python3",
+        "/Users/a77/Desktop/git/78boot/scripts/sign_images.py",
+        "--boot",
+        "/Users/a77/Desktop/git/78boot/y700/TB322_ZUXOS_1.1.11.263_Tool/image/init_boot.img",
+        "--output",
+        "/Users/a77/Desktop/git/78boot/verification/signing-smoke/wrong-partition"
+      ],
+      "input": null,
+      "stdout": "",
+      "stderr": "sign-images: boot: partition descriptor mismatch\n",
+      "exit_status": 1
+    }
+  ]
+}

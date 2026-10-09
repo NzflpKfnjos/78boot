@@ -1,0 +1,33 @@
+{
+  "selected": "KernelSU",
+  "selection_state": "build-candidate; device validation pending",
+  "kmi": "android15-6.6",
+  "reason": "Both reviewed snapshots support android15-6.6 and CONFIG_KSU_DISABLE_MANAGER. Start with tiann/KernelSU's LKM path; no Next-specific feature is required.",
+  "sources": {
+    "KernelSU": {
+      "url": "https://github.com/tiann/KernelSU.git",
+      "commit": "df03912f70d92ff2aa9762ef82d607033d37e1da",
+      "observed_branch": "main",
+      "kernel_license": "GPL-2.0-only",
+      "userspace_license": "GPL-3.0-or-later"
+    },
+    "KernelSU-Next": {
+      "url": "https://github.com/KernelSU-Next/KernelSU-Next.git",
+      "commit": "8d41fffa5dd791d5f25eb279185342d60a0f42f2",
+      "observed_branch": "dev",
+      "kernel_license": "GPL-2.0-only",
+      "userspace_license": "GPL-3.0-or-later"
+    }
+  },
+  "build": {
+    "ddk_image": "ghcr.io/ylarod/ddk-min:android15-6.6-20260828",
+    "ndk": "r29",
+    "rust": "stable; actual rustc version recorded in artifact",
+    "cargo_dependencies": "upstream Cargo.lock with --locked",
+    "kernel_config": "config/no-manager.config"
+  },
+  "stock_inputs": {
+    "init_boot.img": "46462e73cd604df84676f225e614539d7695ad295236d40f231b5f4fe9c1cd8f",
+    "vbmeta.img": "91b3e5fb7d41c16af0ab530197f6e16d52266de969f27aa5ceea145881b8400e"
+  }
+}

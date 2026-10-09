@@ -1,0 +1,180 @@
+{
+  "images": {
+    "boot.img": {
+      "path": "/Users/a77/Desktop/git/78boot/y700/TB322_ZUXOS_1.1.11.263_Tool/image/boot.img",
+      "bytes": 100663296,
+      "sha256": "ec05dcf7ad951c3672cbd8bb20379aec45632faa13f7fe439330e950de0b7f4d",
+      "header_version": 4,
+      "kernel_bytes": 36461056,
+      "ramdisk_bytes": 0,
+      "header_os_version_raw": 0,
+      "linux_banners": [
+        "Linux version 6.6.89-android15-8-g14220ae4ce65-ab13680582-4k (kleaf@build-host) (Android (11368308, +pgo, +bolt, +lto, +mlgo, based on r510928) clang version 18.0.0 (https://android.googlesource.com/toolchain/llvm-project 477610d4d0d988e69dbc3fae4fe86bff3f07f2b5), LLD 18.0.0) #1 SMP PREEMPT Mon Jun 23 07:30:57 UTC 2025"
+      ],
+      "config_path": "/Users/a77/Desktop/git/78boot/verification/stage0/boot.img.config",
+      "config_sha256": "6828cedf9426de7654a28b0870a494fd6e1c78701f8d115f86d1cd4e81832675",
+      "config_subset": [
+        "CONFIG_KALLSYMS=y",
+        "CONFIG_KALLSYMS_ALL=y",
+        "CONFIG_ARM64=y",
+        "CONFIG_ARM64_PAGE_SHIFT=12",
+        "CONFIG_ARM64_4K_PAGES=y",
+        "CONFIG_KPROBES=y",
+        "CONFIG_CFI_CLANG=y",
+        "CONFIG_MODULES=y",
+        "CONFIG_MODVERSIONS=y",
+        "# CONFIG_MODULE_SIG_FORCE is not set",
+        "CONFIG_MODULE_SIG_PROTECT=y",
+        "CONFIG_EXT4_FS=y",
+        "CONFIG_SECURITY_SELINUX=y"
+      ]
+    },
+    "init_boot.img": {
+      "path": "/Users/a77/Desktop/git/78boot/y700/TB322_ZUXOS_1.1.11.263_Tool/image/init_boot.img",
+      "bytes": 8388608,
+      "sha256": "46462e73cd604df84676f225e614539d7695ad295236d40f231b5f4fe9c1cd8f",
+      "header_version": 4,
+      "kernel_bytes": 0,
+      "ramdisk_bytes": 2457778,
+      "header_os_version_raw": 0,
+      "linux_banners": []
+    },
+    "vendor_boot.img": {
+      "path": "/Users/a77/Desktop/git/78boot/y700/TB322_ZUXOS_1.1.11.263_Tool/image/vendor_boot.img",
+      "bytes": 100663296,
+      "sha256": "9b32b45b7a7435f4d8211dc19167561dc492040011a626f91f7f7b7a4f0de288",
+      "header_version": 4,
+      "page_size": 4096,
+      "linux_banners": []
+    },
+    "vbmeta.img": {
+      "path": "/Users/a77/Desktop/git/78boot/y700/TB322_ZUXOS_1.1.11.263_Tool/image/vbmeta.img",
+      "bytes": 8192,
+      "sha256": "91b3e5fb7d41c16af0ab530197f6e16d52266de969f27aa5ceea145881b8400e",
+      "linux_banners": []
+    },
+    "vmlinux": {
+      "path": "/Users/a77/Desktop/git/78boot/y700/TB322_ZUXOS_1.1.11.263_Tool/image/vmlinux",
+      "bytes": 323461728,
+      "sha256": "1de29b9dd58108adba534447895bfebe4ff2072b0dd27beb702776095ca8f0d8",
+      "linux_banners": [
+        "Linux version 6.6.89-android15-8-maybe-dirty-4k (kleaf@build-host) (Android (11368308, +pgo, +bolt, +lto, +mlgo, based on r510928) clang version 18.0.0 (https://android.googlesource.com/toolchain/llvm-project 477610d4d0d988e69dbc3fae4fe86bff3f07f2b5), LLD 18.0.0) #1 SMP PREEMPT Thu Jan  1 00:00:00 UTC 1970"
+      ],
+      "config_path": "/Users/a77/Desktop/git/78boot/verification/stage0/vmlinux.config",
+      "config_sha256": "d7df58dbf8cd4c11bccdc60d49948336780694e78d12a207799f808bc4cd2abe",
+      "config_subset": [
+        "CONFIG_KALLSYMS=y",
+        "CONFIG_KALLSYMS_ALL=y",
+        "CONFIG_ARM64=y",
+        "CONFIG_ARM64_PAGE_SHIFT=12",
+        "CONFIG_ARM64_4K_PAGES=y",
+        "CONFIG_KPROBES=y",
+        "CONFIG_CFI_CLANG=y",
+        "CONFIG_MODULES=y",
+        "CONFIG_MODVERSIONS=y",
+        "# CONFIG_MODULE_SIG_FORCE is not set",
+        "CONFIG_MODULE_SIG_PROTECT=y",
+        "CONFIG_EXT4_FS=y",
+        "CONFIG_SECURITY_SELINUX=y"
+      ]
+    }
+  },
+  "partitions": [
+    {
+      "source": "/Users/a77/Desktop/git/78boot/y700/TB322_ZUXOS_1.1.11.263_Tool/image/rawprogram4.xml",
+      "label": "boot_a",
+      "filename": "boot.img",
+      "bytes": 100663296
+    },
+    {
+      "source": "/Users/a77/Desktop/git/78boot/y700/TB322_ZUXOS_1.1.11.263_Tool/image/rawprogram4.xml",
+      "label": "vbmeta_a",
+      "filename": "vbmeta.img",
+      "bytes": 65536
+    },
+    {
+      "source": "/Users/a77/Desktop/git/78boot/y700/TB322_ZUXOS_1.1.11.263_Tool/image/rawprogram4.xml",
+      "label": "vendor_boot_a",
+      "filename": "vendor_boot.img",
+      "bytes": 100663296
+    },
+    {
+      "source": "/Users/a77/Desktop/git/78boot/y700/TB322_ZUXOS_1.1.11.263_Tool/image/rawprogram4.xml",
+      "label": "recovery_a",
+      "filename": "recovery.img",
+      "bytes": 104857600
+    },
+    {
+      "source": "/Users/a77/Desktop/git/78boot/y700/TB322_ZUXOS_1.1.11.263_Tool/image/rawprogram4.xml",
+      "label": "init_boot_a",
+      "filename": "init_boot.img",
+      "bytes": 8388608
+    },
+    {
+      "source": "/Users/a77/Desktop/git/78boot/y700/TB322_ZUXOS_1.1.11.263_Tool/image/rawprogram4.xml",
+      "label": "boot_b",
+      "filename": "",
+      "bytes": 100663296
+    },
+    {
+      "source": "/Users/a77/Desktop/git/78boot/y700/TB322_ZUXOS_1.1.11.263_Tool/image/rawprogram4.xml",
+      "label": "vbmeta_b",
+      "filename": "",
+      "bytes": 65536
+    },
+    {
+      "source": "/Users/a77/Desktop/git/78boot/y700/TB322_ZUXOS_1.1.11.263_Tool/image/rawprogram4.xml",
+      "label": "vendor_boot_b",
+      "filename": "",
+      "bytes": 100663296
+    },
+    {
+      "source": "/Users/a77/Desktop/git/78boot/y700/TB322_ZUXOS_1.1.11.263_Tool/image/rawprogram4.xml",
+      "label": "recovery_b",
+      "filename": "",
+      "bytes": 104857600
+    },
+    {
+      "source": "/Users/a77/Desktop/git/78boot/y700/TB322_ZUXOS_1.1.11.263_Tool/image/rawprogram4.xml",
+      "label": "init_boot_b",
+      "filename": "",
+      "bytes": 8388608
+    }
+  ],
+  "vmlinux_banner_matches_boot": false,
+  "running_device_confirmed": false,
+  "script": {
+    "path": "/Users/a77/Desktop/git/tomato/release/1_no_login.sh",
+    "sha256": "e9cb5f84428910e83c0c43957fa8deb01ce4fc3d7b899aaecea7810993c62200",
+    "payload_line": 84,
+    "executed": false,
+    "payloads": {
+      "payload.elf": {
+        "bytes": 5489560,
+        "sha256": "34ad72d1ebae323321f446ebac7bf98128c971ce5f6da36d9299b073a11c713a",
+        "class": 64,
+        "endianness": "little",
+        "machine": 183,
+        "architecture": "aarch64",
+        "interpreter": "/system/bin/linker64",
+        "needed_libraries": [
+          "libandroid.so",
+          "liblog.so",
+          "libm.so",
+          "libdl.so",
+          "libc.so"
+        ]
+      },
+      "config_fetch_helper.elf": {
+        "bytes": 972004,
+        "sha256": "7bc804db4a1233215eb4f9713aa1efaaff329b6bb6bf03140b4ea358e4ba900f",
+        "class": 64,
+        "endianness": "little",
+        "machine": 183,
+        "architecture": "aarch64",
+        "interpreter": null,
+        "needed_libraries": []
+      }
+    }
+  }
+}

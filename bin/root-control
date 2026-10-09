@@ -1,0 +1,46 @@
+#!/system/bin/sh
+# Run only the pinned script from a root-owned private installation.
+# This entry point does not grant root and does not disable upstream su.
+set -eu
+PATH=/system/bin
+export PATH
+unset ENV BASH_ENV CDPATH LD_PRELOAD LD_LIBRARY_PATH
+umask 077
+TB=/system/bin/toybox
+BASE=/data/adb/root-control
+SCRIPT=/data/adb/root-control/scripts/1_no_login.sh
+EXPECTED=e9cb5f84428910e83c0c43957fa8deb01ce4fc3d7b899aaecea7810993c62200
+
+deny() {
+    printf 'root-control: %s\n' "$1" >&2
+    exit 1
+}
+
+[ "$("$TB" id -u)" = 0 ] || deny 'root caller required'
+[ "$#" = 1 ] || deny 'usage: root-control 1|2'
+case "$1" in
+    1|2) ;;
+    *) deny 'only mode 1 or 2 is allowed' ;;
+esac
+
+# /data/adb is the private trust boundary. Reject writable or linked entries.
+for directory in /data/adb "$BASE" "$BASE/bin" "$BASE/scripts"; do
+    [ ! -L "$directory" ] && [ -d "$directory" ] || deny 'invalid installation directory'
+    metadata=$("$TB" stat -c '%u:%g:%a' "$directory") || deny 'cannot inspect directory'
+    [ "$metadata" = '0:0:700' ] || deny 'directory must be root:root mode 700'
+done
+for file in "$BASE/bin/root-control" "$SCRIPT"; do
+    [ ! -L "$file" ] && [ -f "$file" ] || deny 'invalid installation file'
+    metadata=$("$TB" stat -c '%u:%g:%a' "$file") || deny 'cannot inspect file'
+    case "$file:$metadata" in
+        "$BASE/bin/root-control:0:0:500"|"$SCRIPT:0:0:400") ;;
+        *) deny 'invalid file ownership or permissions' ;;
+    esac
+done
+actual=$("$TB" sha256sum "$SCRIPT") || deny 'cannot hash script'
+[ "${actual%% *}" = "$EXPECTED" ] || deny 'script hash mismatch'
+printf 'root-control: starting pinned script, mode=%s\n' "$1" >&2
+cd /
+# Drop inherited variables; forward only the approved parameter.
+exec "$TB" env -i PATH=/system/bin HOME=/data/adb/root-control TMPDIR=/data/local/tmp \
+    /system/bin/sh "$SCRIPT" "$1"

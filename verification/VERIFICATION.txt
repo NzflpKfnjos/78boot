@@ -1,0 +1,324 @@
+Host policy verification; NOT Android device validation.
+Initial test command: python3 tests/test_root_control.py; exit=1.
+Initial failure: host adapter attempted /bin/sha256sum (absent on macOS); FileNotFoundError; runner stderr root-control: cannot hash script.
+Correction: compute SHA-256 in the host adapter using Python hashlib.
+Second test attempt: exit=1; macOS /bin/sh absent script returned 127 / No such file or directory, rather than assumed 2 / cannot open.
+Correction: use platform-specific absent-script status, with literal results recorded below.
+Caller UID and root ownership are simulated by a host adapter.
+Payload is a harmless fixture; production script was never executed.
+BASELINE and ROLLBACK are absent-file states for this newly added entry.
+No original file hash exists for the absent baseline.
+Changed entry: bin/root-control fixed path/hash/argument authorization.
+{
+  "artifacts": {
+    "/Users/a77/Desktop/git/78boot/bin/root-control": "6f9ae6a53f2a518c0bd44137c3366adb399b5db0b1b0f1c790a0bb1dd02b29e5",
+    "/Users/a77/Desktop/git/78boot/scripts/install.sh": "5d6fa02197da536ec1fd4222ed5d78209ec4a8f2cca6df43ba8a7ac1ca491b52",
+    "/Users/a77/Desktop/git/78boot/scripts/ROLLBACK.sh": "6cd411721d06a60384b033c4773922fff0a35bbb2a5bd108d425fbdfa6b99b15",
+    "/Users/a77/Desktop/git/78boot/verification/root-control.patch": "549cf9b611e2849bb5d8cb199540f8f47681b23c034213d4668a09104a653417"
+  },
+  "records": [
+    {
+      "name": "approved-mode-1",
+      "command": [
+        "/bin/sh",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-control-test-59kfn6b8/adb/root-control/bin/root-control",
+        "1"
+      ],
+      "input": [
+        "1"
+      ],
+      "simulated_uid": "0",
+      "stdout": "fixture mode=1 secret=unset\n",
+      "stderr": "root-control: starting pinned script, mode=1\n",
+      "exit_status": 7
+    },
+    {
+      "name": "approved-mode-2",
+      "command": [
+        "/bin/sh",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-control-test-59kfn6b8/adb/root-control/bin/root-control",
+        "2"
+      ],
+      "input": [
+        "2"
+      ],
+      "simulated_uid": "0",
+      "stdout": "fixture mode=2 secret=unset\n",
+      "stderr": "root-control: starting pinned script, mode=2\n",
+      "exit_status": 7
+    },
+    {
+      "name": "non-root-denied",
+      "command": [
+        "/bin/sh",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-control-test-59kfn6b8/adb/root-control/bin/root-control",
+        "1"
+      ],
+      "input": [
+        "1"
+      ],
+      "simulated_uid": "2000",
+      "stdout": "",
+      "stderr": "root-control: root caller required\n",
+      "exit_status": 1
+    },
+    {
+      "name": "invalid-mode-denied",
+      "command": [
+        "/bin/sh",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-control-test-59kfn6b8/adb/root-control/bin/root-control",
+        "sh"
+      ],
+      "input": [
+        "sh"
+      ],
+      "simulated_uid": "0",
+      "stdout": "",
+      "stderr": "root-control: only mode 1 or 2 is allowed\n",
+      "exit_status": 1
+    },
+    {
+      "name": "extra-argument-denied",
+      "command": [
+        "/bin/sh",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-control-test-59kfn6b8/adb/root-control/bin/root-control",
+        "1",
+        "/bin/sh"
+      ],
+      "input": [
+        "1",
+        "/bin/sh"
+      ],
+      "simulated_uid": "0",
+      "stdout": "",
+      "stderr": "root-control: usage: root-control 1|2\n",
+      "exit_status": 1
+    },
+    {
+      "name": "missing-argument-denied",
+      "command": [
+        "/bin/sh",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-control-test-59kfn6b8/adb/root-control/bin/root-control"
+      ],
+      "input": [],
+      "simulated_uid": "0",
+      "stdout": "",
+      "stderr": "root-control: usage: root-control 1|2\n",
+      "exit_status": 1
+    },
+    {
+      "name": "tampered-script-denied",
+      "command": [
+        "/bin/sh",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-control-test-59kfn6b8/adb/root-control/bin/root-control",
+        "1"
+      ],
+      "input": [
+        "1"
+      ],
+      "simulated_uid": "0",
+      "stdout": "",
+      "stderr": "root-control: script hash mismatch\n",
+      "exit_status": 1
+    },
+    {
+      "name": "writable-script-denied",
+      "command": [
+        "/bin/sh",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-control-test-59kfn6b8/adb/root-control/bin/root-control",
+        "1"
+      ],
+      "input": [
+        "1"
+      ],
+      "simulated_uid": "0",
+      "stdout": "",
+      "stderr": "root-control: invalid file ownership or permissions\n",
+      "exit_status": 1
+    },
+    {
+      "name": "writable-directory-denied",
+      "command": [
+        "/bin/sh",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-control-test-59kfn6b8/adb/root-control/bin/root-control",
+        "1"
+      ],
+      "input": [
+        "1"
+      ],
+      "simulated_uid": "0",
+      "stdout": "",
+      "stderr": "root-control: directory must be root:root mode 700\n",
+      "exit_status": 1
+    },
+    {
+      "name": "symlink-script-denied",
+      "command": [
+        "/bin/sh",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-control-test-59kfn6b8/adb/root-control/bin/root-control",
+        "1"
+      ],
+      "input": [
+        "1"
+      ],
+      "simulated_uid": "0",
+      "stdout": "",
+      "stderr": "root-control: invalid installation file\n",
+      "exit_status": 1
+    },
+    {
+      "name": "missing-script-denied",
+      "command": [
+        "/bin/sh",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-control-test-59kfn6b8/adb/root-control/bin/root-control",
+        "1"
+      ],
+      "input": [
+        "1"
+      ],
+      "simulated_uid": "0",
+      "stdout": "",
+      "stderr": "root-control: invalid installation file\n",
+      "exit_status": 1
+    },
+    {
+      "name": "BASELINE",
+      "command": [
+        "/bin/sh",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-control-test-59kfn6b8/transaction-runner",
+        "1"
+      ],
+      "input": [
+        "1"
+      ],
+      "simulated_uid": "0",
+      "stdout": "",
+      "stderr": "/bin/sh: /var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-control-test-59kfn6b8/transaction-runner: No such file or directory\n",
+      "exit_status": 127
+    },
+    {
+      "name": "MODIFIED",
+      "command": [
+        "/bin/sh",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-control-test-59kfn6b8/transaction-runner",
+        "1"
+      ],
+      "input": [
+        "1"
+      ],
+      "simulated_uid": "0",
+      "stdout": "fixture mode=1 secret=unset\n",
+      "stderr": "root-control: starting pinned script, mode=1\n",
+      "exit_status": 7
+    },
+    {
+      "name": "rollback-command",
+      "command": [
+        "/bin/sh",
+        "/Users/a77/Desktop/git/78boot/scripts/ROLLBACK.sh",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-control-test-59kfn6b8/transaction-runner"
+      ],
+      "stdout": "Restored absent-file baseline: /var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-control-test-59kfn6b8/transaction-runner\n",
+      "stderr": "",
+      "exit_status": 0
+    },
+    {
+      "name": "ROLLBACK",
+      "command": [
+        "/bin/sh",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-control-test-59kfn6b8/transaction-runner",
+        "1"
+      ],
+      "input": [
+        "1"
+      ],
+      "simulated_uid": "0",
+      "stdout": "",
+      "stderr": "/bin/sh: /var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-control-test-59kfn6b8/transaction-runner: No such file or directory\n",
+      "exit_status": 127
+    },
+    {
+      "name": "install-non-root-denied",
+      "command": [
+        "/bin/sh",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-control-test-59kfn6b8/install.sh",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-control-test-59kfn6b8/fixture.sh",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-control-test-59kfn6b8/source-runner"
+      ],
+      "input": [
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-control-test-59kfn6b8/fixture.sh",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-control-test-59kfn6b8/source-runner"
+      ],
+      "simulated_uid": "2000",
+      "stdout": "",
+      "stderr": "install: root caller required\n",
+      "exit_status": 1
+    },
+    {
+      "name": "install-tampered-source-denied",
+      "command": [
+        "/bin/sh",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-control-test-59kfn6b8/install.sh",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-control-test-59kfn6b8/fixture.sh",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-control-test-59kfn6b8/source-runner"
+      ],
+      "input": [
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-control-test-59kfn6b8/fixture.sh",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-control-test-59kfn6b8/source-runner"
+      ],
+      "simulated_uid": "0",
+      "stdout": "",
+      "stderr": "install: source script hash mismatch\n",
+      "exit_status": 1
+    },
+    {
+      "name": "install-approved",
+      "command": [
+        "/bin/sh",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-control-test-59kfn6b8/install.sh",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-control-test-59kfn6b8/fixture.sh",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-control-test-59kfn6b8/source-runner"
+      ],
+      "input": [
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-control-test-59kfn6b8/fixture.sh",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-control-test-59kfn6b8/source-runner"
+      ],
+      "simulated_uid": "0",
+      "stdout": "Installed: /var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-control-test-59kfn6b8/adb/root-control/bin/root-control\n",
+      "stderr": "",
+      "exit_status": 0
+    },
+    {
+      "name": "installed-runner",
+      "command": [
+        "/bin/sh",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-control-test-59kfn6b8/adb/root-control/bin/root-control",
+        "1"
+      ],
+      "input": [
+        "1"
+      ],
+      "simulated_uid": "0",
+      "stdout": "fixture mode=1 secret=unset\n",
+      "stderr": "root-control: starting pinned script, mode=1\n",
+      "exit_status": 7
+    },
+    {
+      "name": "install-overwrite-denied",
+      "command": [
+        "/bin/sh",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-control-test-59kfn6b8/install.sh",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-control-test-59kfn6b8/fixture.sh",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-control-test-59kfn6b8/source-runner"
+      ],
+      "input": [
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-control-test-59kfn6b8/fixture.sh",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-control-test-59kfn6b8/source-runner"
+      ],
+      "simulated_uid": "0",
+      "stdout": "",
+      "stderr": "install: installation already exists\n",
+      "exit_status": 1
+    }
+  ]
+}
