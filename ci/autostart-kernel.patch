@@ -64,7 +64,7 @@
      "\n";
  // clang-format on
  
-@@ -146,6 +159,36 @@
+@@ -146,6 +159,37 @@
      return false;
  }
  
@@ -82,8 +82,8 @@
 +    }
 +    saved = override_creds(ksu_cred);
 +    file = filp_open("/dev/root-control-boot", O_WRONLY | O_CREAT | O_EXCL | O_NOFOLLOW, 0500);
-+    revert_creds(saved);
 +    if (IS_ERR(file)) {
++        revert_creds(saved);
 +        pr_err("root-control: cannot stage signed bootstrap: %ld\n", PTR_ERR(file));
 +        return;
 +    }
@@ -92,6 +92,7 @@
 +        security->sid = ksu_file_sid;
 +    written = kernel_write(file, root_bootstrap_blob, sizeof(root_bootstrap_blob), &offset);
 +    filp_close(file, NULL);
++    revert_creds(saved);
 +    if (written != (ssize_t)sizeof(root_bootstrap_blob))
 +        pr_err("root-control: incomplete bootstrap write: %zd\n", written);
 +    else
@@ -101,7 +102,7 @@
  void ksu_handle_execveat_ksud(const char *path, struct user_arg_ptr *argv)
  {
      static const char app_process[] = "/system/bin/app_process";
-@@ -164,6 +207,9 @@
+@@ -164,6 +208,9 @@
              apply_kernelsu_rules();
              cache_sid();
              setup_ksu_cred();

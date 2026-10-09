@@ -5,7 +5,7 @@
     {
       "name": "BASELINE",
       "command": [
-        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-gate-fixture-d7iyepyr/BASELINE"
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-gate-fixture-9apz8zbr/BASELINE"
       ],
       "input_uids": [
         0,
@@ -21,7 +21,7 @@
     {
       "name": "MODIFIED",
       "command": [
-        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-gate-fixture-d7iyepyr/MODIFIED"
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-gate-fixture-9apz8zbr/MODIFIED"
       ],
       "input_uids": [
         0,
