@@ -3,10 +3,10 @@
 ## 当前状态
 
 - ACTIVE_OBJECT：78boot 无 Manager 的固定脚本 root 控制方案。
-- LAST_CONFIRMED_RESULT：内嵌候选 Actions 37962844664 四任务成功；下载的 init_boot 中已验证完整脚本与启动组件字节一致、签名及回滚通过；8 项自动启动 fixture 检查及原生授权函数测试通过；真实 Android shell 调用 bootstrap 被拒绝，未执行载荷。
-- NEXT_EXECUTABLE_ACTION：用户手动 9008 将新签名 init_boot/vbmeta 写入 A 槽并开机后，读取 RootControl 日志确认准备、模式 1 自动启动及退出结果，再复测检测软件。
-- INPUT_PATHS：`out/autostart-37962844664/`、`verification/autostart-artifact-verification.json`、`verification/autostart-actions-result.json`、`verification/autostart-device-authorization.json`。
-- ACCEPTANCE_EVENT：新镜像设备重启后记录固定脚本模式 1 的真实启动结果，并保存普通 app root/SELinux 探测复测。当前镜像交付和主机验收完成；手动刷入按用户要求保留给用户。
+- LAST_CONFIRMED_RESULT：用户刷入 37962844664 后开机但脚本未运行；设备证据确认 sys.boot_completed=1、两个服务 stopped，内核日志为 `avc: denied { write } ... /dev/root-control-boot ... scontext=u:r:kernel:s0`。失败点已定位为 bootstrap 写入时过早恢复 trusted credentials，修复已提交并触发 Actions 37966016671。
+- NEXT_EXECUTABLE_ACTION：下载并复核修复版已成功构建的签名 init_boot/vbmeta；再由用户手动 9008 刷入 A 槽，读取 RootControl 日志确认脚本运行。
+- INPUT_PATHS：`verification/autostart-device-failure.json`、`verification/autostart-all-boot-log.log`、`ci/autostart-kernel.patch`、`verification/actions-download/37966016671/`。
+- ACCEPTANCE_EVENT：修复版设备日志必须出现 bootstrap prepared、mode=1 和 script exit；已知失败版不再作为可用候选。
 
 ## 已执行
 
