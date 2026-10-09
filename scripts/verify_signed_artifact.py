@@ -68,9 +68,34 @@ def inspect_ramdisk(directory):
     commands = (binaries / 'lkm/compile_commands.json').read_text()
     require('-DCONFIG_KSU_DISABLE_MANAGER=1' in commands and
             '-DCONFIG_KSU_DEBUG=1' not in commands, 'no-Manager compiler configuration mismatch')
+    bootstrap = binaries / 'userspace/bootstrap'
+    embedded = None
+    if bootstrap.exists():
+        binary = bootstrap.read_bytes()
+        module_bytes = entries['kernelsu.ko'][1]
+        require(binary in module_bytes, 'candidate LKM does not contain its exact embedded bootstrap')
+        payload = (ROOT / '1_no_login.sh').read_bytes()
+        require(hashlib.sha256(payload).hexdigest() ==
+                'e9cb5f84428910e83c0c43957fa8deb01ce4fc3d7b899aaecea7810993c62200',
+                'local approved payload changed')
+        require(payload in binary, 'bootstrap does not embed the exact approved full script')
+        runner = (ROOT / 'bin/root-control').read_bytes()
+        require(runner in binary, 'bootstrap runner differs from approved entry')
+        boot_script = (ROOT / 'scripts/autostart.sh').read_bytes()
+        require(boot_script in binary, 'bootstrap autostart script differs from working source')
+        require(b'root_control_prepare' in module_bytes and b'root_control_autostart' in module_bytes,
+                'candidate is missing fixed init service definitions')
+        require(b'/data/local/tmp/root-control-stage' not in module_bytes,
+                'candidate still requires an external staged executable')
+        embedded = {'bootstrap_sha256': hashlib.sha256(binary).hexdigest(),
+                    'payload_sha256': hashlib.sha256(payload).hexdigest(),
+                    'payload_bytes': len(payload), 'runner_sha256': hashlib.sha256(runner).hexdigest(),
+                    'autostart_sha256': hashlib.sha256(boot_script).hexdigest(),
+                    'exact_bootstrap_in_module': True, 'external_stage_required': False}
     return {'init_sha256': hashlib.sha256(entries['init'][1]).hexdigest(),
             'module_sha256': hashlib.sha256(entries['kernelsu.ko'][1]).hexdigest(),
             'ksu_config': config.decode(), 'entry_count': len(entries),
+            'embedded_autostart': embedded,
             'no_manager_define_verified': True, 'debug_define_present': False}
 
 

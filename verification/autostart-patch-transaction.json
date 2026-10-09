@@ -1,0 +1,63 @@
+{
+  "result": "verified",
+  "original_files_unchanged": true,
+  "records": [
+    {
+      "name": "BASELINE",
+      "autostart_service_present": false,
+      "external_stage_required": false,
+      "hashes": {
+        "kernel/selinux/rules.c": "7e371370296351055783ce24f5ea0138af3fa98e800d6dcd93a640ba9d941076",
+        "kernel/runtime/ksud_integration.c": "3d96f0ec8c789027389cbb4bdac6e7c7abff1c2b74195cfaa171c7644ee8a2d3",
+        "kernel/supercall/supercall.c": "5f2ae1acc6c050838b130fd108dd8ad20150b5fee04246ae7367e14b9e6ff108",
+        "kernel/policy/allowlist.c": "ee651ac8a61ca50cb2ebf43b567541a5e2dcc577ce33927f753f1c1b4b85fd17",
+        "kernel/feature/sucompat.c": "9d6a9bb1855b0287b804e06db28108fcf06a33006a3953d31bb375a889ebf68d"
+      }
+    },
+    {
+      "name": "apply",
+      "command": [
+        "git",
+        "apply",
+        "/Users/a77/Desktop/git/78boot/ci/autostart-kernel.patch"
+      ],
+      "stdout": "",
+      "stderr": "",
+      "exit_status": 0
+    },
+    {
+      "name": "MODIFIED",
+      "autostart_service_present": true,
+      "external_stage_required": false,
+      "hashes": {
+        "kernel/selinux/rules.c": "522b1b1e9959dd6039bdac553973b994a9689fda5e1dcb1312553c5c5a536d0a",
+        "kernel/runtime/ksud_integration.c": "10baaf563b9742a579816f8f7d22e21f7da2a8461bd02a6cd25b4b6a7176679c",
+        "kernel/supercall/supercall.c": "2d96c9d4c7222aa7f80d6656b2f661d525d0076d7cf81d448615fcc293026e29",
+        "kernel/policy/allowlist.c": "61e41226baa6985c4b60edd5f63d89e30cb01f06f8f1c372897183f7e924087f",
+        "kernel/feature/sucompat.c": "d26463de7891815fc715759db0b9198cc04beb9153031578139d6bbb95f128d9"
+      }
+    },
+    {
+      "name": "rollback",
+      "command": [
+        "/Users/a77/Desktop/git/78boot/scripts/ROLLBACK-autostart.sh",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/autostart-patch-6kwb0p94"
+      ],
+      "stdout": "Restored kernel/selinux/rules.c sha256=7e371370296351055783ce24f5ea0138af3fa98e800d6dcd93a640ba9d941076\nRestored kernel/runtime/ksud_integration.c sha256=3d96f0ec8c789027389cbb4bdac6e7c7abff1c2b74195cfaa171c7644ee8a2d3\nRestored kernel/supercall/supercall.c sha256=5f2ae1acc6c050838b130fd108dd8ad20150b5fee04246ae7367e14b9e6ff108\nRestored kernel/policy/allowlist.c sha256=ee651ac8a61ca50cb2ebf43b567541a5e2dcc577ce33927f753f1c1b4b85fd17\nRestored kernel/feature/sucompat.c sha256=9d6a9bb1855b0287b804e06db28108fcf06a33006a3953d31bb375a889ebf68d\n",
+      "stderr": "",
+      "exit_status": 0
+    },
+    {
+      "name": "ROLLBACK",
+      "autostart_service_present": false,
+      "external_stage_required": false,
+      "hashes": {
+        "kernel/selinux/rules.c": "7e371370296351055783ce24f5ea0138af3fa98e800d6dcd93a640ba9d941076",
+        "kernel/runtime/ksud_integration.c": "3d96f0ec8c789027389cbb4bdac6e7c7abff1c2b74195cfaa171c7644ee8a2d3",
+        "kernel/supercall/supercall.c": "5f2ae1acc6c050838b130fd108dd8ad20150b5fee04246ae7367e14b9e6ff108",
+        "kernel/policy/allowlist.c": "ee651ac8a61ca50cb2ebf43b567541a5e2dcc577ce33927f753f1c1b4b85fd17",
+        "kernel/feature/sucompat.c": "9d6a9bb1855b0287b804e06db28108fcf06a33006a3953d31bb375a889ebf68d"
+      }
+    }
+  ]
+}

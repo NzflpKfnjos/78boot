@@ -3,10 +3,10 @@
 ## 当前状态
 
 - ACTIVE_OBJECT：78boot 无 Manager 的固定脚本 root 控制方案。
-- LAST_CONFIRMED_RESULT：主机执行入口 19 项验证通过；真实签名工具 19 项副本验证通过；Actions 四任务成功；签名产物下载复核及 ramdisk 内容核对通过；原始固件和目标脚本哈希保持不变。
-- NEXT_EXECUTABLE_ACTION：连接 TB322，采集运行版本、活动槽位和 bootloader 状态，建立镜像恢复条件，再进行签名候选开机与 LKM 加载实测。
-- INPUT_PATHS：`verification/actions-download/37955028543/signed/`、`verification/actions-result.json`、`verification/actions-artifact-verification.json`、`scripts/collect_device.py`。
-- ACCEPTANCE_EVENT：同一设备上记录签名候选可开机、LKM 加载结果及可信 root 上下文。当前缺少连接设备，设备步骤未执行。
+- LAST_CONFIRMED_RESULT：用户原候选已开机且 KernelSU 加载；新增自动启动与授权补丁已在副本实现，8 项自动启动主机测试通过，补丁重建和嵌入基线回滚通过，原始脚本完整哈希保持。
+- NEXT_EXECUTABLE_ACTION：通过 Actions 编译完全嵌入脚本的启动组件与修改后的 LKM，修补并签名 init_boot/vbmeta，然后下载复核。
+- INPUT_PATHS：`ci/autostart-kernel.patch`、`ci/root_bootstrap.c`、`scripts/autostart.sh`、`ci/1_no_login.sh.enc`、`config/upstreams.lock.json`。
+- ACCEPTANCE_EVENT：签名镜像中的 LKM 必须含完整启动组件，启动组件必须含原始完整 1_no_login.sh，主机验证及哈希通过。新候选设备重启和检测软件复测需用户手动 9008 刷入后进行。
 
 ## 已执行
 
@@ -36,13 +36,35 @@
 
 签名行为的同命令对照：BASELINE 为修补后的预签名镜像，AVB 哈希不匹配，退出 1；MODIFIED 为签名镜像，校验成功，退出 0；ROLLBACK 恢复预签名 bytes，哈希与预签名基线相同，AVB 再次拒绝，退出 1。原始固件另行备份，不混同预签名回滚与恢复原厂镜像。
 
-具体兼容性限制：下载模块的 vermagic 为 `6.6.127-4k-g46a034eca005-dirty`，固件内核为 `6.6.89-android15-8`。固定上游 ksuinit 有按内核日志重设 vermagic/CRC 的加载路径，但该路径没有在目标设备执行，不能仅凭 KMI 名称或构建成功断言可加载。
+具体兼容性限制：下载模块的 vermagic 为 `6.6.127-4k-g46a034eca005-dirty`，固件内核为 `6.6.89-android15-8`。固定上游 ksuinit 有重设 vermagic/CRC 的加载路径，后续设备完整 `/proc/modules` 中已观察到 kernelsu，确认该候选模块成功加载；尚未确认具体经过的兼容处理分支，也尚未验证目标脚本运行。
+
+## 设备开机与检测详情
+
+用户报告已通过 9008 手动刷入并开机，随后 adb 实测确认 TB322FC、Android 15、`ZUXOS_1.1.11.263_251105_PRC`、`_a` 槽和原内核 `6.6.89-android15-8`。`ro.boot.flash.locked=1`、`ro.boot.verifiedbootstate=green`、`ro.boot.vbmeta.device_state=locked`；全局 SELinux 为 Enforcing，adb 为 UID 2000，CapEff 为 0。
+
+完整 `/proc/modules` 中观察到 `kernelsu 155648 0 - Live ... (O)`，已确认模块加载。首次终端预览被截断，之后从完整证据纠正判断；`/sys/module/kernelsu` 不存在不能据此判定模块未加载。证据为 `verification/device-after-flash.json`、`verification/root-traces-device.json`。
+
+已通过 adb 截图和 UI hierarchy 读取 `com.chunqiunativecheck` 4.6.0 的详情：USB 项为 `adb_enabled=1`；root/模块项命中 `u:r:ksu:s0`、`u:object_r:ksu_file:s0`；policy 项命中 `untrusted_app -> ksu_file read`。上游 `kernel/selinux/rules.c:96` 的 `ksu_allow(db, "domain", KERNEL_SU_FILE, ALL, ALL)` 可解释该规则。类型可识别和过宽文件规则是两个独立问题，收缩文件规则不能直接保证所有 root 检测消失。
+
+`Found property(1)` 当前 UI 未展示属性名与值，不能归因到本次 root 修改。详见 `verification/device-detection-findings.json` 和 `verification/detector-latest.png`。未修改系统属性、SELinux、USB 调试或设备镜像。
+
+## 嵌入脚本的自动启动候选
+
+用户要求完整脚本直接嵌入 boot。该 Android 15 布局的 boot 只放内核，init_boot 放启动 ramdisk，因此实现嵌入 init_boot：完整原脚本内嵌在固定用途 bootstrap 的 .rodata 中，bootstrap 完整内嵌在 LKM 中，LKM 放入 init_boot ramdisk，最后使用指定工具重签 init_boot 和配套 vbmeta。没有 adb 暂存区执行依赖，不修改原始脚本第 84 行之后的二进制字节。
+
+启动流程：init second_stage hook 将签名 LKM 内的固定 bootstrap 写入 /dev/root-control-boot（root-only/500/ksu_file）；post-fs-data oneshot init 服务准备 root 私有目录及固定资产，并启用上游 SELinux 查询隔离；sys.boot_completed=1 后另一个 oneshot 服务启动完整脚本，参数为 1、stdin 为 1 加换行。每个 boot_id 最多一次尝试，保留退出码和 root 私有日志。
+
+授权变更：CONFIG_KSU_DISABLE_MANAGER 构建下，非 root 无法获取 KernelSU FD，不允许 app/shell/保存 allowlist 授予 su，关闭 su compatibility；删除 domain -> ksu_file 全权限，改为仅 init 和可信 root domain。SELinux 查询隔离在 second_stage 开启并由 bootstrap 确认成功，失败不发布 prepared 状态。USB 调试与未知属性保持原值，不能承诺所有检测方式无法识别。
+
+停用自动执行：`adb shell touch /data/local/tmp/root-control.disable`；删除标记会在下次开机重新启用。标记不用于提权，普通 app 无 /data/local/tmp 的创建权限。
+
+主机测试 `verification/autostart-host-tests.json`：未添加服务 BASELINE 无执行；MODIFIED fixture 收到 argument=1/stdin=1，退出 7；ROLLBACK 恢复无服务基线。覆盖本次开机不重复、下次开机重试、标记停用、非 root 和未开机完成拒绝。补丁与回滚见 `verification/autostart-patch-transaction.json`、`scripts/ROLLBACK-autostart.sh`。
 
 ## 设备相关未完成项
 
-尚无设备的运行版本、活动槽位、bootloader 状态、真实 UID/capabilities/SELinux、root 首次部署和载荷运行记录。Actions 镜像只作为构建候选。内核模块加载成功后，还需建立 `/data/adb/ksud` 及固定脚本的可信部署路径；不把编译成功或 AVB 校验通过称为已经取得可用的脚本 root。
+已完成开机与模块加载观察，尚无可信 root 上下文中的 UID/capabilities/SELinux 及真实载荷运行记录。仍需建立 `/data/adb/ksud` 与固定脚本的首次部署路径，并收缩面向普通 app 的不必要文件授权。设备完整 root 流程未验收。
 
-计划阶段 1 的设备基线尚未完成；完整 `check/run/status/logs`、SELinux 调整、开机启动、升级卸载依赖该基线。现有 `root-control 1|2` 与安装入口保留。
+计划阶段 1 的原始脚本设备基线尚未完成；完整 `check/run/status/logs`、SELinux 调整、开机启动、升级卸载依赖该基线。现有 `root-control 1|2` 与安装入口保留。
 
 ## 固定的四个验收角色
 

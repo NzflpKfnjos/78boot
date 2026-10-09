@@ -1,0 +1,108 @@
+{
+  "result": "passed",
+  "payload": "harmless fixture; UID simulated",
+  "records": [
+    {
+      "name": "BASELINE-no-autostart",
+      "command": [
+        "/bin/sh",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/autostart-fixture-bb2qotbk/absent-service.sh"
+      ],
+      "environment": {},
+      "stdout": "",
+      "stderr": "/bin/sh: /var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/autostart-fixture-bb2qotbk/absent-service.sh: No such file or directory\n",
+      "exit_status": 127
+    },
+    {
+      "name": "MODIFIED-mode1-and-newline",
+      "command": [
+        "/bin/sh",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/autostart-fixture-bb2qotbk/autostart.sh"
+      ],
+      "environment": {},
+      "stdout": "",
+      "stderr": "-p i -t RootControl starting pinned script; mode=1\n-p i -t RootControl pinned script finished; exit=7\n",
+      "exit_status": 7
+    },
+    {
+      "name": "same-boot-does-not-repeat",
+      "command": [
+        "/bin/sh",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/autostart-fixture-bb2qotbk/autostart.sh"
+      ],
+      "environment": {},
+      "stdout": "",
+      "stderr": "",
+      "exit_status": 0
+    },
+    {
+      "name": "next-boot-runs-again",
+      "command": [
+        "/bin/sh",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/autostart-fixture-bb2qotbk/autostart.sh"
+      ],
+      "environment": {},
+      "stdout": "",
+      "stderr": "-p i -t RootControl starting pinned script; mode=1\n-p i -t RootControl pinned script finished; exit=7\n",
+      "exit_status": 7
+    },
+    {
+      "name": "owner-disable-marker",
+      "command": [
+        "/bin/sh",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/autostart-fixture-bb2qotbk/autostart.sh"
+      ],
+      "environment": {},
+      "stdout": "",
+      "stderr": "-p i -t RootControl autostart disabled by owner marker\n",
+      "exit_status": 0
+    },
+    {
+      "name": "ordinary-caller-denied",
+      "command": [
+        "/bin/sh",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/autostart-fixture-bb2qotbk/autostart.sh"
+      ],
+      "environment": {
+        "TEST_UID": "2000"
+      },
+      "stdout": "",
+      "stderr": "",
+      "exit_status": 1
+    },
+    {
+      "name": "before-boot-complete-denied",
+      "command": [
+        "/bin/sh",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/autostart-fixture-bb2qotbk/autostart.sh"
+      ],
+      "environment": {
+        "TEST_BOOT_COMPLETED": "0"
+      },
+      "stdout": "",
+      "stderr": "",
+      "exit_status": 1
+    },
+    {
+      "name": "rollback-command",
+      "command": [
+        "/Users/a77/Desktop/git/78boot/scripts/ROLLBACK.sh",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/autostart-fixture-bb2qotbk/rollback-copy.sh"
+      ],
+      "stdout": "Restored absent-file baseline: /var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/autostart-fixture-bb2qotbk/rollback-copy.sh\n",
+      "stderr": "",
+      "exit_status": 0
+    },
+    {
+      "name": "ROLLBACK-no-autostart",
+      "command": [
+        "/bin/sh",
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/autostart-fixture-bb2qotbk/rollback-copy.sh"
+      ],
+      "environment": {},
+      "stdout": "",
+      "stderr": "/bin/sh: /var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/autostart-fixture-bb2qotbk/rollback-copy.sh: No such file or directory\n",
+      "exit_status": 127
+    }
+  ]
+}

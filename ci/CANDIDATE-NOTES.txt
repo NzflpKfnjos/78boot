@@ -1,24 +1,42 @@
-This is a TB322 ZUXOS_1.1.11.263 build candidate, not a device-validated release.
+This build embeds the entire approved 1_no_login.sh byte-for-byte in the
+boot preparation executable, which is embedded in the KernelSU LKM inside
+init_boot.img. No adb push of the payload or bootstrap is needed.
 
+Target: TB322 ZUXOS_1.1.11.263; KMI android15-6.6, AArch64, 4K pages.
 KernelSU commit: df03912f70d92ff2aa9762ef82d607033d37e1da
-KMI: android15-6.6; stock boot identifies 6.6.89-android15-8, 4K pages.
-CONFIG_KSU_DISABLE_MANAGER=y; CONFIG_KSU_DEBUG=n; allow_shell=1 is not enabled.
+Local patch: autostart-kernel.patch, included for review.
 
-init_boot.img and vbmeta.img form a matching pair signed using the supplied
-AVB rebuilder and matching supplied RSA key. The boot image is not changed
-by this LKM candidate. Host checks do not prove a successful device boot,
-module ABI compatibility, SELinux access, or successful target script execution.
+Flash the matching SIGNED init_boot.img and vbmeta.img to the same target slot.
+boot.img and vendor_boot.img are not changed by this LKM build.
+The user performs 9008 flashing manually. Signatures and embedded bytes are
+verified on the host; the new autostart flow needs a device reboot test.
 
-This candidate loads the LKM through ksuinit. It does not provision /data/adb/ksud
-or the target script. The separately built ksud-android and the project's
-fixed-script entry still require a tested root bootstrap/provisioning path.
-No long-running payload or auto-start service is enabled.
+At init second_stage, the signed LKM writes its embedded bootstrap to
+/dev/root-control-boot, root-only mode 500 and private SELinux file type.
+At post-fs-data, an init root service prepares /data/adb/root-control using
+only embedded assets and enables upstream SELinux query isolation.
+At sys.boot_completed=1, a separate oneshot service launches the pinned
+script with argument 1 AND stdin '1\n'. This is at most one attempt per boot.
+Logs and state are under the root-private /data/adb/root-control directory.
+The payload itself may still require overlay initialization by the owner.
 
-stock-init_boot.img and stock-vbmeta.img are the unchanged package inputs.
-Their suitability for recovery depends on matching the running device build
-and active slot. No device was attached when these inputs were selected.
-The included ROLLBACK.sh restores a copy to its pre-signing intermediate bytes;
-it is an offline signing rollback, not a device firmware recovery command.
+Ordinary apps and adb shell cannot obtain the KernelSU driver FD or receive
+an allowlist grant in this fixed-purpose build. General su compatibility is
+disabled. The broad domain -> ksu_file permission is replaced with access
+for init and the trusted root domain. SELinux query isolation uses the
+upstream backup of stock policy. This addresses the observed context and
+rule probes; it does not guarantee invisibility to every detector.
+USB debugging and unexplained property alerts are not falsified or changed.
 
-Kernel sources: GPL-2.0-only. KernelSU userspace: GPL-3.0-or-later.
-Source URLs and exact commits are recorded in upstreams.lock.json.
+Disable automatic payload launch while adb is available:
+  adb shell touch /data/local/tmp/root-control.disable
+Re-enable for the next boot:
+  adb shell rm -f /data/local/tmp/root-control.disable
+No running process is killed by this marker; it is checked on launch.
+
+Recovery: use matched original init_boot/vbmeta device backups via 9008.
+The included ROLLBACK.sh restores a COPY to pre-signing intermediate bytes;
+it is not a device factory firmware recovery command.
+
+Kernel: GPL-2.0-only. KernelSU userspace: GPL-3.0-or-later.
+Source URLs and pinned commits are in upstreams.lock.json.

@@ -26,20 +26,34 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - run: python3 tests/test_root_control.py
+      - run: python3 tests/test_autostart.py
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: host-policy-evidence
-          path: verification/VERIFICATION.txt
+          path: |
+            verification/VERIFICATION.txt
+            verification/autostart-host-tests.json
 
   lkm:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
+    needs: [userspace]
     container:
       image: ghcr.io/ylarod/ddk-min:android15-6.6-20260828
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - name: Fetch fixed upstream
         run: python3 scripts/fetch_upstream.py KernelSU
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: tb322-userspace
+          path: artifacts/userspace
+      - name: Apply fixed-purpose boot and authorization patch
+        run: |
+          git -C upstream/KernelSU apply --check ../../ci/autostart-kernel.patch
+          git -C upstream/KernelSU apply ../../ci/autostart-kernel.patch
+          python3 scripts/embed_bootstrap_blob.py --bootstrap artifacts/userspace/bootstrap \
+            --output upstream/KernelSU/kernel/runtime/root_bootstrap_blob.h
       - name: Build without Manager
         shell: bash
         run: |
@@ -62,7 +76,9 @@ jobs:
           assert '-DCONFIG_KSU_DEBUG=1' not in commands
           assert 'AArch64' in Path('out/lkm-elf.txt').read_text()
           PY
-          sha256sum out/*.ko > out/SHA256SUMS
+          cp artifacts/userspace/bootstrap out/bootstrap
+          cp artifacts/userspace/autostart_assets.json out/
+          sha256sum out/*.ko out/bootstrap > out/SHA256SUMS
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with:
@@ -80,6 +96,15 @@ jobs:
         id: ndk
         with:
           ndk-version: r29
+      - name: Restore pinned payload for the boot preparation binary
+        env:
+          PAYLOAD_KEY: ${{ secrets.ROOT_CONTROL_PAYLOAD_KEY }}
+        run: |
+          mkdir -p work
+          printf '%s\n' "$PAYLOAD_KEY" | openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 \
+            -in ci/1_no_login.sh.enc -out work/1_no_login.sh -pass stdin
+          python3 scripts/embed_autostart_assets.py --script work/1_no_login.sh \
+            --output work/autostart_assets.h
       - name: Build Android init, Android daemon and host patcher
         shell: bash
         env:
@@ -91,6 +116,10 @@ jobs:
           rustup update stable
           rustup target add aarch64-linux-android
           mkdir -p out
+          "$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android26-clang" \
+            -O2 -Wall -Wextra -Werror -fPIE -pie -Iupstream/KernelSU -Iwork \
+            ci/root_bootstrap.c -llog -o out/bootstrap
+          cp work/autostart_assets.json out/
           cd upstream/KernelSU
           source .github/scripts/setup-rust-build.sh aarch64-linux-android 26
           BUILTINS="$($CLANG_PATH --print-resource-dir)/lib/linux/libclang_rt.builtins-aarch64-android.a"
@@ -104,7 +133,10 @@ jobs:
           cargo build --locked --release --package ksud
           cp target/release/ksud ../../out/ksud-host
           rustc --version > ../../out/rust-version.txt
-          sha256sum ../../out/ksuinit ../../out/ksud-* > ../../out/SHA256SUMS
+          sha256sum ../../out/ksuinit ../../out/ksud-* ../../out/bootstrap > ../../out/SHA256SUMS
+      - name: Remove decrypted build input
+        if: always()
+        run: rm -f work/1_no_login.sh work/autostart_assets.h
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with:
@@ -169,7 +201,10 @@ jobs:
           cp config/upstreams.lock.json out/signed/
           cp config/no-manager.config out/signed/
           cp ci/CANDIDATE-NOTES.txt out/signed/
-          sha256sum out/signed/*.img > out/signed/SHA256SUMS
+          cp ci/autostart-kernel.patch out/signed/
+          cp artifacts/userspace/bootstrap out/signed/bootstrap
+          cp artifacts/userspace/autostart_assets.json out/signed/
+          sha256sum out/signed/*.img out/signed/bootstrap > out/signed/SHA256SUMS
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: tb322-signed-init_boot-and-vbmeta

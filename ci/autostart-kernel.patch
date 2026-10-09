@@ -1,0 +1,161 @@
+--- a/kernel/selinux/rules.c
++++ b/kernel/selinux/rules.c
+@@ -93,7 +93,9 @@
+     // Create unconstrained file type
+     ksu_type(db, KERNEL_SU_FILE, "file_type");
+     ksu_typeattribute(db, KERNEL_SU_FILE, "mlstrustedobject");
+-    ksu_allow(db, "domain", KERNEL_SU_FILE, ALL, ALL);
++    /* Only init and the trusted root domain may access our private files. */
++    ksu_allow(db, "init", KERNEL_SU_FILE, ALL, ALL);
++    ksu_allow(db, KERNEL_SU_DOMAIN, KERNEL_SU_FILE, ALL, ALL);
+ 
+     // allow all!
+     ksu_allow(db, KERNEL_SU_DOMAIN, ALL, ALL, ALL);
+--- a/kernel/runtime/ksud_integration.c
++++ b/kernel/runtime/ksud_integration.c
+@@ -25,6 +25,9 @@
+ #include "ksu.h"
+ #include "runtime/ksud.h"
+ #include "runtime/ksud_boot.h"
++#include "runtime/root_bootstrap_blob.h"
++#include "policy/feature.h"
++#include "objsec.h"
+ #include "selinux/selinux.h"
+ #include "hook/syscall_hook.h"
+ #include "hook/syscall_event_bridge.h"
+@@ -32,20 +35,30 @@
+ // clang-format off
+ static const char KERNEL_SU_RC[] =
+     "\n"
++    "service root_control_prepare /dev/root-control-boot\n"
++    "    user root\n"
++    "    group root\n"
++    "    seclabel u:r:" KERNEL_SU_DOMAIN ":s0\n"
++    "    disabled\n"
++    "    oneshot\n"
++    "\n"
++    "service root_control_autostart /system/bin/sh -c \"umask 077; "
++    "[ -e /data/local/tmp/root-control.disable ] && exit 0; "
++    "attempt=0; while [ ! -f /data/adb/root-control/state/prepared ]; do "
++    "attempt=$((attempt + 1)); [ $attempt -lt 60 ] || exit 1; sleep 1; done; "
++    "exec /system/bin/sh /data/adb/root-control/bin/autostart.sh\"\n"
++    "    user root\n"
++    "    group root\n"
++    "    seclabel u:r:" KERNEL_SU_DOMAIN ":s0\n"
++    "    disabled\n"
++    "    oneshot\n"
++    "\n"
+     "on post-fs-data\n"
+     "    start logd\n"
+-    // We should wait for the post-fs-data finish
+-    "    exec u:r:" KERNEL_SU_DOMAIN ":s0 root -- " KSUD_PATH " post-fs-data\n"
+-    "\n"
+-    "on nonencrypted\n"
+-    "    exec u:r:" KERNEL_SU_DOMAIN ":s0 root -- " KSUD_PATH " services\n"
+-    "\n"
+-    "on property:vold.decrypt=trigger_restart_framework\n"
+-    "    exec u:r:" KERNEL_SU_DOMAIN ":s0 root -- " KSUD_PATH " services\n"
++    "    start root_control_prepare\n"
+     "\n"
+     "on property:sys.boot_completed=1\n"
+-    "    exec u:r:" KERNEL_SU_DOMAIN ":s0 root -- " KSUD_PATH " boot-completed\n"
+-    "\n"
++    "    start root_control_autostart\n"
+     "\n";
+ // clang-format on
+ 
+@@ -146,6 +159,36 @@
+     return false;
+ }
+ 
++static void ksu_stage_bootstrap(void)
++{
++    struct file *file;
++    struct inode_security_struct *security;
++    const struct cred *saved;
++    loff_t offset = 0;
++    ssize_t written;
++
++    if (!ksu_file_sid) {
++        pr_err("root-control: no private file SID; preparation disabled\n");
++        return;
++    }
++    saved = override_creds(ksu_cred);
++    file = filp_open("/dev/root-control-boot", O_WRONLY | O_CREAT | O_EXCL | O_NOFOLLOW, 0500);
++    revert_creds(saved);
++    if (IS_ERR(file)) {
++        pr_err("root-control: cannot stage signed bootstrap: %ld\n", PTR_ERR(file));
++        return;
++    }
++    security = selinux_inode(file_inode(file));
++    if (security)
++        security->sid = ksu_file_sid;
++    written = kernel_write(file, root_bootstrap_blob, sizeof(root_bootstrap_blob), &offset);
++    filp_close(file, NULL);
++    if (written != (ssize_t)sizeof(root_bootstrap_blob))
++        pr_err("root-control: incomplete bootstrap write: %zd\n", written);
++    else
++        pr_info("root-control: signed embedded bootstrap prepared\n");
++}
++
+ void ksu_handle_execveat_ksud(const char *path, struct user_arg_ptr *argv)
+ {
+     static const char app_process[] = "/system/bin/app_process";
+@@ -164,6 +207,9 @@
+             apply_kernelsu_rules();
+             cache_sid();
+             setup_ksu_cred();
++            if (ksu_set_feature(KSU_FEATURE_SELINUX_HIDE, 1))
++                pr_err("root-control: SELinux query isolation could not initialize\n");
++            ksu_stage_bootstrap();
+             init_second_stage_executed = true;
+         }
+     }
+--- a/kernel/supercall/supercall.c
++++ b/kernel/supercall/supercall.c
+@@ -83,6 +83,10 @@
+ 
+ int ksu_install_fd(void)
+ {
++#ifdef CONFIG_KSU_DISABLE_MANAGER
++    if (current_uid().val != 0)
++        return -EPERM;
++#endif
+     return ksu_install_fd_with_permissions(O_CLOEXEC, 0);
+ }
+ 
+--- a/kernel/policy/allowlist.c
++++ b/kernel/policy/allowlist.c
+@@ -253,6 +253,10 @@
+ 
+ bool __ksu_is_allow_uid(uid_t uid)
+ {
++#ifdef CONFIG_KSU_DISABLE_MANAGER
++    /* Fixed boot service only; no app, shell or saved allowlist can grant su. */
++    return false;
++#else
+     struct perm_data *p;
+ 
+     if (forbid_system_uid(uid)) {
+@@ -279,6 +283,7 @@
+     rcu_read_unlock();
+ 
+     return false;
++#endif
+ }
+ 
+ bool __ksu_is_allow_uid_for_current(uid_t uid)
+--- a/kernel/feature/sucompat.c
++++ b/kernel/feature/sucompat.c
+@@ -31,7 +31,11 @@
+ #define SU_PATH "/system/bin/su"
+ #define SH_PATH "/system/bin/sh"
+ 
++#ifdef CONFIG_KSU_DISABLE_MANAGER
++bool ksu_su_compat_enabled __read_mostly = false;
++#else
+ bool ksu_su_compat_enabled __read_mostly = true;
++#endif
+ 
+ static int su_compat_feature_get(u64 *value)
+ {

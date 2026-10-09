@@ -1,0 +1,22 @@
+{
+  "kernel/selinux/rules.c": {
+    "baseline": "7e371370296351055783ce24f5ea0138af3fa98e800d6dcd93a640ba9d941076",
+    "modified": "522b1b1e9959dd6039bdac553973b994a9689fda5e1dcb1312553c5c5a536d0a"
+  },
+  "kernel/runtime/ksud_integration.c": {
+    "baseline": "3d96f0ec8c789027389cbb4bdac6e7c7abff1c2b74195cfaa171c7644ee8a2d3",
+    "modified": "10baaf563b9742a579816f8f7d22e21f7da2a8461bd02a6cd25b4b6a7176679c"
+  },
+  "kernel/supercall/supercall.c": {
+    "baseline": "5f2ae1acc6c050838b130fd108dd8ad20150b5fee04246ae7367e14b9e6ff108",
+    "modified": "2d96c9d4c7222aa7f80d6656b2f661d525d0076d7cf81d448615fcc293026e29"
+  },
+  "kernel/policy/allowlist.c": {
+    "baseline": "ee651ac8a61ca50cb2ebf43b567541a5e2dcc577ce33927f753f1c1b4b85fd17",
+    "modified": "61e41226baa6985c4b60edd5f63d89e30cb01f06f8f1c372897183f7e924087f"
+  },
+  "kernel/feature/sucompat.c": {
+    "baseline": "9d6a9bb1855b0287b804e06db28108fcf06a33006a3953d31bb375a889ebf68d",
+    "modified": "d26463de7891815fc715759db0b9198cc04beb9153031578139d6bbb95f128d9"
+  }
+}

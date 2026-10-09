@@ -24,7 +24,11 @@
     "ndk": "r29",
     "rust": "stable; actual rustc version recorded in artifact",
     "cargo_dependencies": "upstream Cargo.lock with --locked",
-    "kernel_config": "config/no-manager.config"
+    "kernel_config": "config/no-manager.config",
+    "local_patch": "ci/autostart-kernel.patch",
+    "embedded_payload_sha256": "e9cb5f84428910e83c0c43957fa8deb01ce4fc3d7b899aaecea7810993c62200",
+    "boot_mode": "argument 1 and stdin 1 plus newline after sys.boot_completed=1",
+    "payload_source": "encrypted CI input; decrypt with ROOT_CONTROL_PAYLOAD_KEY Actions Secret"
   },
   "stock_inputs": {
     "init_boot.img": "46462e73cd604df84676f225e614539d7695ad295236d40f231b5f4fe9c1cd8f",

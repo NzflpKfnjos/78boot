@@ -6,5 +6,6 @@
 /verification/actions-download/
 /out/
 /work/
+/1_no_login.sh
 __pycache__/
 *.pyc
