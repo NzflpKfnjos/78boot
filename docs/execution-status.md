@@ -50,23 +50,21 @@
 
 ## 嵌入脚本的自动启动候选
 
-用户要求完整脚本直接嵌入 boot。该 Android 15 布局的 boot 只放内核，init_boot 放启动 ramdisk，因此实现嵌入 init_boot：完整原脚本内嵌在固定用途 bootstrap 的 .rodata 中，bootstrap 完整内嵌在 LKM 中，LKM 放入 init_boot ramdisk，最后使用指定工具重签 init_boot 和配套 vbmeta。没有 adb 暂存区执行依赖，不修改原始脚本第 84 行之后的二进制字节。
+用户要求完整脚本直接嵌入 boot。该 Android 15 布局的 boot 只放内核，init_boot 放启动 ramdisk，因此实现嵌入 init_boot：完整原脚本内嵌在固定用途 bootstrap 的 .rodata 中，bootstrap 直接作为 init_boot ramdisk 的 `/root-control-bootstrap` 文件（0500），LKM 放入 init_boot ramdisk，最后使用指定工具重签 init_boot 和配套 vbmeta。没有 adb 暂存区执行依赖，不修改原始脚本第 84 行之后的二进制字节。
 
-启动流程：init second_stage hook 将签名 LKM 内的固定 bootstrap 写入 /dev/root-control-boot（root-only/500/ksu_file）；post-fs-data oneshot init 服务准备 root 私有目录及固定资产，并启用上游 SELinux 查询隔离；sys.boot_completed=1 后另一个 oneshot 服务启动完整脚本，参数为 1、stdin 为 1 加换行。每个 boot_id 最多一次尝试，保留退出码和 root 私有日志。
+启动流程：post-fs-data oneshot init 服务直接执行签名 ramdisk 中的 bootstrap；它准备 root 私有目录及固定资产并启用上游 SELinux 查询隔离；sys.boot_completed=1 后另一个 oneshot 服务启动完整脚本，参数为 1、stdin 为 1 加换行。每个 boot_id 最多一次尝试，保留退出码和 root 私有日志。上一候选使用 `/dev/root-control-boot`，实机因 SELinux 拒绝写入导致失败，已从修复版移除。
 
-授权变更：CONFIG_KSU_DISABLE_MANAGER 构建下，非 root 无法获取 KernelSU FD，不允许 app/shell/保存 allowlist 授予 su，关闭 su compatibility；删除 domain -> ksu_file 全权限，改为仅 init 和可信 root domain。SELinux 查询隔离在 second_stage 开启并由 bootstrap 确认成功，失败不发布 prepared 状态。USB 调试与未知属性保持原值，不能承诺所有检测方式无法识别。
+授权变更：CONFIG_KSU_DISABLE_MANAGER 构建下，非 root 无法获取 KernelSU FD，不允许 app/shell/保存 allowlist 授予 su，关闭 su compatibility；删除 domain -> ksu_file 全权限，改为仅 init 和可信 root domain。SELinux 查询隔离在 second_stage 开启。USB 调试与未知属性保持原值，不能承诺所有检测方式无法识别。
 
 停用自动执行：`adb shell touch /data/local/tmp/root-control.disable`；删除标记会在下次开机重新启用。标记不用于提权，普通 app 无 /data/local/tmp 的创建权限。
 
-主机测试 `verification/autostart-host-tests.json`：未添加服务 BASELINE 无执行；MODIFIED fixture 收到 argument=1/stdin=1，退出 7；ROLLBACK 恢复无服务基线。覆盖本次开机不重复、下次开机重试、标记停用、非 root 和未开机完成拒绝。补丁与回滚见 `verification/autostart-patch-transaction.json`、`scripts/ROLLBACK-autostart.sh`。
+主机测试 `verification/autostart-host-tests.json`：未添加服务 BASELINE 无执行；MODIFIED fixture 收到 argument=1/stdin=1，退出 7；ROLLBACK 恢复无服务基线。补丁与回滚见 `verification/autostart-patch-transaction.json`、`scripts/ROLLBACK-autostart.sh`。
 
-新的 Actions：https://github.com/NzflpKfnjos/78boot/actions/runs/37962844664 ，构建 commit `744d5bb5f615afdd212cfbf9ccf5d8d0f26489e2`，四任务成功。下载复核报告 `verification/autostart-artifact-verification.json` 确认 exact_bootstrap_in_module=true、完整原脚本 2,931,586 bytes、external_stage_required=false；init_boot 有效数据 7,483,392 bytes，分区总长仍为 8,388,608 bytes。
+最终修复版 Actions：https://github.com/NzflpKfnjos/78boot/actions/runs/37969410923 ，四任务成功。最终 `init_boot` 的 CPIO 项数为 23，直接包含 `/root-control-bootstrap`，模式 0500，SHA-256 `4cac653c9527d6be8786ccda58efa96f3fbd6c9064aeccec401ceab63b2b89fe`；验证报告为 `verification/autostart-artifact-verification-final.json`。最终交付包为 `out/TB322-ZUXOS_1.1.11.263-embedded-autostart-37969410923.zip`。
 
-新产物哈希：init_boot.img `3888ca88a3e32c2ed142b0a79fb0f02d7bb76933cf010b1047d8c9cd08049669`；vbmeta.img `6227585db6058e3236c2433ca54f92f9589f492cdcdfbcda78a5d75341b1eb0a`；LKM `cb440a14ba3fb6dba2d83306208e0a37f4781c62d757a624a413a7b9853ab92d`；bootstrap `4cac653c9527d6be8786ccda58efa96f3fbd6c9064aeccec401ceab63b2b89fe`。
+最终 init_boot SHA-256 `19ea11528ab9538d5dbbde7ae57d042a3dbb2a20a8bd8d0a420137acdbfb42f4`；最终 vbmeta SHA-256 `bd11c84edb0a97ba01cbf91682718c80c8ff89aedf5c3a102c27b59880b5252f`。最终设备自动启动仍需用户通过 9008 刷入后复测。
 
-真实 Android 上仅测试了非 root 调用 bootstrap：UID 2000 被拒绝，退出 1，RootControl 日志为 `root-only preparation required: Operation not permitted`。临时二进制已删除；没有安装服务、修改 device policy 或运行载荷。native 真实函数体测试则验证 root 可获得 driver FD、shell/app UID 被拒绝、非 root app grant 恒 false。新 boot 流程需用户刷入后执行。
-
-## 设备相关未完成项
+## 下一步设备验证
 
 已完成开机与模块加载观察，尚无可信 root 上下文中的 UID/capabilities/SELinux 及真实载荷运行记录。仍需建立 `/data/adb/ksud` 与固定脚本的首次部署路径，并收缩面向普通 app 的不必要文件授权。设备完整 root 流程未验收。
 
