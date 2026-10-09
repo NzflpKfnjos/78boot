@@ -1,0 +1,3 @@
+# Preserve the supplied signing sources byte-for-byte, including CRLF.
+tools/avb/*.py -text -whitespace
+ci/stock/*.img -text

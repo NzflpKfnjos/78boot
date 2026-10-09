@@ -1,0 +1,57 @@
+[
+  {
+    "name": "patch-reconstruction",
+    "command": [
+      "/usr/bin/patch",
+      "-p0",
+      "-i",
+      "/Users/a77/Desktop/git/78boot/verification/root-control.patch"
+    ],
+    "stdout": "patching file 'bin/root-control'\n",
+    "stderr": "",
+    "exit_status": 0
+  },
+  {
+    "name": "production-copy-rollback",
+    "command": [
+      "/Users/a77/Desktop/git/78boot/scripts/ROLLBACK.sh",
+      "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-patch-recheck-ujom8t_k/bin/root-control"
+    ],
+    "stdout": "Restored absent-file baseline: /var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-patch-recheck-ujom8t_k/bin/root-control\n",
+    "stderr": "",
+    "exit_status": 0
+  },
+  {
+    "name": "shell-syntax",
+    "command": [
+      "/bin/sh",
+      "-n",
+      "/Users/a77/Desktop/git/78boot/bin/root-control"
+    ],
+    "stdout": "",
+    "stderr": "",
+    "exit_status": 0
+  },
+  {
+    "name": "shell-syntax",
+    "command": [
+      "/bin/sh",
+      "-n",
+      "/Users/a77/Desktop/git/78boot/scripts/install.sh"
+    ],
+    "stdout": "",
+    "stderr": "",
+    "exit_status": 0
+  },
+  {
+    "name": "shell-syntax",
+    "command": [
+      "/bin/sh",
+      "-n",
+      "/Users/a77/Desktop/git/78boot/scripts/ROLLBACK.sh"
+    ],
+    "stdout": "",
+    "stderr": "",
+    "exit_status": 0
+  }
+]

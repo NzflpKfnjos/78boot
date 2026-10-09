@@ -65,6 +65,8 @@ adb push /Users/a77/Desktop/git/tomato/release/1_no_login.sh /data/local/tmp/1_n
 
 `.github/workflows/tb322-root.yml` 在 `codex/no-manager-actions` 分支 push 时运行，也支持手动触发。它按 `config/upstreams.lock.json` 固定 KernelSU commit，构建 `android15-6.6` LKM、Android `ksuinit`/`ksud` 以及主机修补器，用 LKM 修补 `init_boot` 副本，再调用提供的签名工具重建并验证 `init_boot` 与 `vbmeta`。构建记录、模块、userspace 和签名镜像分别作为 Actions artifacts 上传。
 
+已在 [Actions 运行 37955028543](https://github.com/NzflpKfnjos/78boot/actions/runs/37955028543) 完成四项任务并下载候选。下载后的镜像哈希、签名、vbmeta 配对、ramdisk 中的编译产物及回滚复验通过；证据见 `verification/actions-result.json` 和 `verification/actions-artifact-verification.json`。本地产物在 `verification/actions-download/37955028543/`。这些是构建候选，尚未通过设备开机验收。
+
 签名工具源文件按原字节保存于 `tools/avb/`。两个密钥仅放在 `ROOT_CONTROL_AVB_RSA2048`、`ROOT_CONTROL_AVB_RSA4096` Actions Secrets 中，值为原文件的 Base64；构建时恢复到临时目录并校验固定哈希，结束时删除。不要将私钥添加到 Git。
 
 ## 镜像签名

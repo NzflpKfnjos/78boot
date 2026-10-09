@@ -3,10 +3,10 @@
 ## 当前状态
 
 - ACTIVE_OBJECT：78boot 无 Manager 的固定脚本 root 控制方案。
-- LAST_CONFIRMED_RESULT：主机执行入口 19 项验证通过；真实签名工具 19 项副本验证通过；原始固件和目标脚本哈希保持不变。
-- NEXT_EXECUTABLE_ACTION：在 GitHub Actions 构建固定 commit 的 LKM 与 userspace，修补 init_boot 副本，使用指定工具签名并下载经过主机验证的候选。
-- INPUT_PATHS：`config/upstreams.lock.json`、`config/no-manager.config`、`ci/stock/init_boot.img`、`ci/stock/vbmeta.img`、`tools/avb/`、Actions Secrets。
-- ACCEPTANCE_EVENT：Actions 构建成功且签名 artifact 下载后哈希校验通过。设备开机属于独立的后续验收。
+- LAST_CONFIRMED_RESULT：主机执行入口 19 项验证通过；真实签名工具 19 项副本验证通过；Actions 四任务成功；签名产物下载复核及 ramdisk 内容核对通过；原始固件和目标脚本哈希保持不变。
+- NEXT_EXECUTABLE_ACTION：连接 TB322，采集运行版本、活动槽位和 bootloader 状态，建立镜像恢复条件，再进行签名候选开机与 LKM 加载实测。
+- INPUT_PATHS：`verification/actions-download/37955028543/signed/`、`verification/actions-result.json`、`verification/actions-artifact-verification.json`、`scripts/collect_device.py`。
+- ACCEPTANCE_EVENT：同一设备上记录签名候选可开机、LKM 加载结果及可信 root 上下文。当前缺少连接设备，设备步骤未执行。
 
 ## 已执行
 
@@ -18,6 +18,25 @@
 6. 保留用户签名 RAR，解包并固定签名源码/密钥哈希。原始工具代码不变，仅通过适配层使用主机 Python 与 OpenSSL。
 7. 验证链式 boot、普通 init_boot+vbmeta、无 footer 修补结果的 metadata 准备、错误分区/缺少 vbmeta/输出覆盖拒绝、签名前后与回滚的字节和哈希。
 8. 原工具会追加相同属性描述符；首轮严格按个数检查失败。诊断记录在 `verification/signing-diagnostic.log`；现允许内容相同的属性重复，仍检查所有其他描述符和签名。首轮失败命令退出码 1；修正后集成测试全部通过。
+
+## Actions 已完成
+
+运行：https://github.com/NzflpKfnjos/78boot/actions/runs/37955028543
+
+分支 `codex/no-manager-actions`，构建 commit `bed73dcf80ed3a7fabd448231fa076caf73a3bfc`。host-policy、lkm、userspace、signed-candidate 四任务均成功。
+
+下载复核确认：镜像输出哈希与 manifest 一致，init_boot 哈希和 vbmeta RSA4096 签名有效；vbmeta 中 init_boot 描述符与镜像完全一致，其他描述符内容保持；ramdisk 内 init 与 kernelsu.ko 分别匹配下载的 ksuinit 和 LKM；编译命令含 CONFIG_KSU_DISABLE_MANAGER=1，不含 CONFIG_KSU_DEBUG=1，ramdisk 未启用 allow_shell=1。
+
+产物：
+
+- `verification/actions-download/37955028543/signed/init_boot.img`，8,388,608 bytes，SHA-256 `f5c29a24654f17948c43012ef863b1f26b6d5f793a18fda1992abb3dc26c0cb4`。
+- `verification/actions-download/37955028543/signed/vbmeta.img`，12,288 bytes，SHA-256 `3a6fcb7d163bd33c4c0838a6ce7eca499747c2bfe2b8142553c80511f81e2ddd`。
+- `verification/actions-download/37955028543/lkm/android15-6.6_kernelsu.ko`，SHA-256 `de18c1048dcdda3eb2e9dfef1a61099c2b99aefc559a82a22a510a1b65f289ef`。
+- `verification/actions-download/37955028543/userspace/`，ksuinit、Android ksud 与 Linux 主机修补器，哈希和 ELF 架构已核对。
+
+签名行为的同命令对照：BASELINE 为修补后的预签名镜像，AVB 哈希不匹配，退出 1；MODIFIED 为签名镜像，校验成功，退出 0；ROLLBACK 恢复预签名 bytes，哈希与预签名基线相同，AVB 再次拒绝，退出 1。原始固件另行备份，不混同预签名回滚与恢复原厂镜像。
+
+具体兼容性限制：下载模块的 vermagic 为 `6.6.127-4k-g46a034eca005-dirty`，固件内核为 `6.6.89-android15-8`。固定上游 ksuinit 有按内核日志重设 vermagic/CRC 的加载路径，但该路径没有在目标设备执行，不能仅凭 KMI 名称或构建成功断言可加载。
 
 ## 设备相关未完成项
 
