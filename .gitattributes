@@ -1,3 +1,7 @@
 # Preserve the supplied signing sources byte-for-byte, including CRLF.
 tools/avb/*.py -text -whitespace
 ci/stock/*.img -text
+# Unified diffs contain mandatory one-space blank context lines.
+ci/*.patch -whitespace
+# This evidence file is the exact compiled init string, including its final separator.
+verification/autostart-init-services.rc whitespace=-blank-at-eof

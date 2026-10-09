@@ -1,0 +1,38 @@
+{
+  "result": "passed",
+  "native_functions": "actual patched function bodies; UID and fd allocation simulated",
+  "records": [
+    {
+      "name": "BASELINE",
+      "command": [
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-gate-fixture-d7iyepyr/BASELINE"
+      ],
+      "input_uids": [
+        0,
+        2000,
+        10000,
+        10123,
+        110123
+      ],
+      "stdout": "uid=0 fd=42\nuid=2000 fd=42\nuid=10000 fd=42\nuid=10123 fd=42\nuid=110123 fd=42\n",
+      "stderr": "",
+      "exit_status": 0
+    },
+    {
+      "name": "MODIFIED",
+      "command": [
+        "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/root-gate-fixture-d7iyepyr/MODIFIED"
+      ],
+      "input_uids": [
+        0,
+        2000,
+        10000,
+        10123,
+        110123
+      ],
+      "stdout": "uid=0 fd=42 app_grant=0\nuid=2000 fd=-1 app_grant=0\nuid=10000 fd=-1 app_grant=0\nuid=10123 fd=-1 app_grant=0\nuid=110123 fd=-1 app_grant=0\n",
+      "stderr": "",
+      "exit_status": 0
+    }
+  ]
+}

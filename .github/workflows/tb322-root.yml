@@ -27,12 +27,15 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - run: python3 tests/test_root_control.py
       - run: python3 tests/test_autostart.py
+      - run: python3 scripts/fetch_upstream.py KernelSU
+      - run: python3 tests/test_boot_authorization.py
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: host-policy-evidence
           path: |
             verification/VERIFICATION.txt
             verification/autostart-host-tests.json
+            verification/autostart-authorization-tests.json
 
   lkm:
     runs-on: ubuntu-24.04

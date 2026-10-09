@@ -1,4 +1,32 @@
 Host policy verification; NOT Android device validation.
+
+Embedded autostart continuation:
+Actions: https://github.com/NzflpKfnjos/78boot/actions/runs/37962844664; build commit 744d5bb5f615afdd212cfbf9ccf5d8d0f26489e2; host-policy/userspace/lkm/signed-candidate all success.
+python3 tests/test_autostart.py; exit=0; 8 PASS checks; literal evidence in verification/autostart-host-tests.json.
+python3 tests/test_boot_authorization.py; exit=0; actual C driver-FD gate: BASELINE gave simulated fd=42 to root/shell/app fixture UIDs; MODIFIED gives fd=42 only to root, returns -1 for shell/app UIDs, app_grant=0 for all; verification/autostart-authorization-tests.json.
+Compiled actual KERNEL_SU_RC string and checked shell syntax; two disabled/oneshot root services, post-fs-data preparation and boot_completed launch; verification/autostart-init-rc-test.json.
+Kernel patch reconstruction and rollback restore all five original file hashes; original upstream unchanged; verification/autostart-patch-transaction.json. Rollback executable: scripts/ROLLBACK-autostart.sh.
+Actual Android non-root bootstrap test: exit=1; logcat literal E/RootControl(15576): root-only preparation required: Operation not permitted. Temporary test binary removed, payload not executed; verification/autostart-device-authorization.json.
+python3 scripts/verify_signed_artifact.py verification/actions-download/37962844664/signed --report verification/autostart-artifact-verification.json; exit=0; stdout='Downloaded hashes, signatures, descriptor pairing and rollback verified: /Users/a77/Desktop/git/78boot/verification/autostart-artifact-verification.json\n'; stderr=''.
+Artifact verifier confirms complete 2,931,586-byte approved 1_no_login.sh inside bootstrap, exact bootstrap inside signed LKM, exact LKM in init_boot ramdisk; no external stage required. Script hash e9cb5f84428910e83c0c43957fa8deb01ce4fc3d7b899aaecea7810993c62200; binary tail unchanged.
+New init_boot SHA-256 3888ca88a3e32c2ed142b0a79fb0f02d7bb76933cf010b1047d8c9cd08049669; vbmeta SHA-256 6227585db6058e3236c2433ca54f92f9589f492cdcdfbcda78a5d75341b1eb0a.
+Signature transaction: BASELINE pre-signing payload hash rejected/exit=1; MODIFIED signed hash accepted/exit=0; ROLLBACK restored pre-signing hash and rejected/exit=1; literal commands/stdout/stderr in verification/autostart-artifact-verification.json.
+Autostart fixture transaction: BASELINE absent service/exit=127 on macOS; MODIFIED fixture stdout logged as arg=1 stdin=1, script exit=7; ROLLBACK absent service/exit=127. No new device boot or real payload execution claimed.
+Ready-to-flash package: out/TB322-ZUXOS_1.1.11.263-embedded-autostart-37962844664.zip; CRC and each entry SHA-256 verified; verification/autostart-package-result.json.
+User performs 9008 flashing manually. Current device remains on prior candidate; new autostart and ordinary-app detector changes need post-flash verification. USB debug and unknown property not altered.
+
+Device follow-up (separate from the fixture records below):
+python3 scripts/collect_device.py --output verification/device-after-flash.json; exit=0; stdout='collected: /Users/a77/Desktop/git/78boot/verification/device-after-flash.json\n'; stderr=''.
+Read-only device checks and literal outputs: verification/root-traces-device.json, verification/root-traces-followup.json, verification/root-properties.json.
+Full /proc/modules includes: kernelsu 155648 0 - Live 0x0000000000000000 (O).
+Observed: TB322FC, matching ZUXOS_1.1.11.263, slot _a, bootloader locked, verifiedbootstate green, global SELinux Enforcing, adb UID 2000/CapEff 0.
+Detector screenshot and UI: verification/detector-latest.png, verification/detector-root-details.xml.
+Displayed details: adb_enabled=1; u:r:ksu:s0; u:object_r:ksu_file:s0; untrusted_app -> ksu_file read. Found property(1) shows no property name/value.
+Source correspondence: kernel/selinux/selinux.h defines ksu and ksu_file; apply_kernelsu_rules in kernel/selinux/rules.c grants domain all access to KERNEL_SU_FILE. No device policy or settings changed.
+Complete diagnosis: verification/device-detection-findings.json.
+Correction: first module-list terminal preview was truncated; the saved full stdout confirms KernelSU loaded.
+Legacy entry BASELINE/MODIFIED/ROLLBACK observations below remain fixture results: absent/fixture/absent; statuses 127/7/127 on macOS. The current device is observed booted with the LKM; no device rollback or real payload execution performed.
+
 Initial test command: python3 tests/test_root_control.py; exit=1.
 Initial failure: host adapter attempted /bin/sha256sum (absent on macOS); FileNotFoundError; runner stderr root-control: cannot hash script.
 Correction: compute SHA-256 in the host adapter using Python hashlib.

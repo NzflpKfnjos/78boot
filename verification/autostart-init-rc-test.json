@@ -1,0 +1,11 @@
+{
+  "result": "passed",
+  "command": [
+    "/var/folders/rf/db3njyy90yxg9j0dgw1nl1tc0000gn/T/init-rc-compile-q57wsp2b/rc"
+  ],
+  "stdout": "\nservice root_control_prepare /dev/root-control-boot\n    user root\n    group root\n    seclabel u:r:ksu:s0\n    disabled\n    oneshot\n\nservice root_control_autostart /system/bin/sh -c \"umask 077; [ -e /data/local/tmp/root-control.disable ] && exit 0; attempt=0; while [ ! -f /data/adb/root-control/state/prepared ]; do attempt=$((attempt + 1)); [ $attempt -lt 60 ] || exit 1; sleep 1; done; exec /system/bin/sh /data/adb/root-control/bin/autostart.sh\"\n    user root\n    group root\n    seclabel u:r:ksu:s0\n    disabled\n    oneshot\n\non post-fs-data\n    start logd\n    start root_control_prepare\n\non property:sys.boot_completed=1\n    start root_control_autostart\n\n",
+  "stderr": "",
+  "exit_status": 0,
+  "shell_command_syntax_verified": true,
+  "prepared_before_autostart": true
+}

@@ -55,7 +55,7 @@ adb push /Users/a77/Desktop/git/tomato/release/1_no_login.sh /data/local/tmp/1_n
 /data/adb/root-control/bin/root-control 2
 ```
 
-此处不提供普通 adb shell 自动获取 root 的命令。也没有自动创建开机服务，避免未经验证的载荷在开机时运行。
+此处不提供普通 adb shell 自动获取 root 的命令。新版内嵌镜像使用固定的 init root 服务自动执行模式 1，见下方“内嵌脚本自动启动”；手动安装入口与镜像自动启动分别验证。
 
 安装脚本本身必须通过可信部署流程传输、审阅和运行。内部哈希可检测载荷变化，不能认证被替换的安装脚本。更新目标脚本时，需要重新审阅并同步修改入口中的脚本哈希及安装脚本中的入口哈希。
 
@@ -65,7 +65,7 @@ adb push /Users/a77/Desktop/git/tomato/release/1_no_login.sh /data/local/tmp/1_n
 
 `.github/workflows/tb322-root.yml` 在 `codex/no-manager-actions` 分支 push 时运行，也支持手动触发。它按 `config/upstreams.lock.json` 固定 KernelSU commit，构建 `android15-6.6` LKM、Android `ksuinit`/`ksud` 以及主机修补器，用 LKM 修补 `init_boot` 副本，再调用提供的签名工具重建并验证 `init_boot` 与 `vbmeta`。构建记录、模块、userspace 和签名镜像分别作为 Actions artifacts 上传。
 
-已在 [Actions 运行 37955028543](https://github.com/NzflpKfnjos/78boot/actions/runs/37955028543) 完成四项任务并下载候选。下载后的镜像哈希、签名、vbmeta 配对、ramdisk 中的编译产物及回滚复验通过；证据见 `verification/actions-result.json` 和 `verification/actions-artifact-verification.json`。本地产物在 `verification/actions-download/37955028543/`。这些是构建候选，尚未通过设备开机验收。
+已在 [Actions 运行 37955028543](https://github.com/NzflpKfnjos/78boot/actions/runs/37955028543) 完成四项任务并下载候选。下载后的镜像哈希、签名、vbmeta 配对、ramdisk 中的编译产物及回滚复验通过；证据见 `verification/actions-result.json` 和 `verification/actions-artifact-verification.json`。本地产物在 `verification/actions-download/37955028543/`。这些产物随后由用户手动通过 9008 刷入，adb 已确认匹配固件、A 槽、locked/green/Enforcing 和 kernelsu 模块加载。当前检测软件能识别上游的 SELinux 类型及文件规则；诊断见 `verification/device-detection-findings.json`。可信 root 上下文及真实脚本运行尚未验收。
 
 签名工具源文件按原字节保存于 `tools/avb/`。两个密钥仅放在 `ROOT_CONTROL_AVB_RSA2048`、`ROOT_CONTROL_AVB_RSA4096` Actions Secrets 中，值为原文件的 Base64；构建时恢复到临时目录并校验固定哈希，结束时删除。不要将私钥添加到 Git。
 
@@ -90,6 +90,27 @@ python3 scripts/sign_images.py --init-boot /absolute/path/to/patched-init_boot.i
 
 `python3 tests/test_sign_images.py` 用原始固件的副本测试真实签名、篡改拒绝、配套 vbmeta 更新及回滚，证据在 `verification/signing-tests.json`。测试目录需要首次为空。输出中的 `ROLLBACK.sh` 接受一个镜像副本的绝对路径，恢复到签名前的输入；设备恢复应使用匹配系统版本与槽位的原始镜像。
 
+## 内嵌脚本自动启动
+
+[Actions 37962844664](https://github.com/NzflpKfnjos/78boot/actions/runs/37962844664) 已构建新版。完整 `1_no_login.sh`（SHA-256 `e9cb5f84428910e83c0c43957fa8deb01ce4fc3d7b899aaecea7810993c62200`）内嵌在固定 bootstrap 中，bootstrap 内嵌在 LKM 中，LKM 内嵌在 `init_boot.img` ramdisk 中。boot.img 在该固件中只放内核，自动启动的正确分区是 init_boot；同时使用指定工具签名配套 vbmeta。无需单独推送脚本或 bootstrap。
+
+在 init second_stage 阶段，从签名模块暂存固定 bootstrap 到 root-only 的 `/dev/root-control-boot`；post-fs-data 的 oneshot root 服务将完整脚本和执行入口准备到 `/data/adb/root-control`。`sys.boot_completed=1` 后另一 oneshot 服务向脚本传递参数 `1`，同时 stdin 提供 `1\n`。每个 boot_id 只尝试一次，私有日志位于 `logs/payload.log`，退出状态位于 `state/autostart.status`。原始脚本及内嵌 ELF 字节保持原样；原载荷的悬浮窗初始化仍需实测。
+
+普通 app 和 adb shell 无法获得 KernelSU FD，app/shell/保存 allowlist 均不能授予 su；关闭通用 su compatibility，将过宽的 domain -> ksu_file 权限改为仅 init 和可信 root domain。启用上游 SELinux 查询隔离以处理已观察的类型和规则探测。未知 Found property(1) 与 USB 调试状态没有被伪造，是否仍有其他检测项由刷入后复测确认。
+
+```sh
+# 停用下次开机的自动执行；不会杀死已运行载荷
+adb shell touch /data/local/tmp/root-control.disable
+# 重新启用下次开机的自动执行
+adb shell rm -f /data/local/tmp/root-control.disable
+# 准备、启动和退出状态日志
+adb logcat -d -v brief -s RootControl:I
+```
+
+新镜像与说明位于 `out/autostart-37962844664/`。adb 当前确认 A 槽：`init_boot.img` 写入 init_boot_a，`vbmeta.img` 写入 vbmeta_a；由用户通过 9008 手动完成。新候选已通过主机签名、精确嵌入和回滚校验；设备当前仍运行上一版，新启动流程尚未在设备执行。
+
+补丁是 `ci/autostart-kernel.patch`，原上游 checkout 保持不变；`scripts/ROLLBACK-autostart.sh` 内嵌原始文件，接受一个源码副本目录并恢复五个修改文件。测试与证据为 `verification/autostart-host-tests.json`、`verification/autostart-authorization-tests.json`、`verification/autostart-artifact-verification.json`。
+
 ## 下一步设备验证
 
 ```sh
@@ -97,4 +118,4 @@ python3 scripts/collect_device.py
 # 多设备时添加 --serial SERIAL
 ```
 
-当前没有 adb/fastboot 设备连接，尚未确认运行系统与固件包一致、活动槽位、bootloader 状态或 LKM 可加载性。首先验证签名候选能启动，再完成无需 Manager 的 `/data/adb/ksud` 与固定脚本部署路径，记录 UID、capabilities 和 SELinux domain。随后在同一设备验证原始脚本的两个模式，补齐 `check/run/status/logs`、升级卸载，并在确认可无人值守运行后接入可关闭的开机服务。
+当前 adb 已确认上一版在匹配的 TB322 ZUXOS_1.1.11.263 固件、A 槽中开机，bootloader locked、Verified Boot green、全局 SELinux Enforcing，kernelsu 已加载。新版嵌入候选已经交付；下一步用户手动刷入同槽位的 init_boot/vbmeta 后，读取 RootControl 日志，验证完整脚本模式 1 的真实运行结果和检测软件告警变化。随后根据载荷实际结果补齐 SELinux 权限、完整 `check/run/status/logs` 与升级卸载流程。

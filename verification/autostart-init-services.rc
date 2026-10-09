@@ -1,0 +1,22 @@
+
+service root_control_prepare /dev/root-control-boot
+    user root
+    group root
+    seclabel u:r:ksu:s0
+    disabled
+    oneshot
+
+service root_control_autostart /system/bin/sh -c "umask 077; [ -e /data/local/tmp/root-control.disable ] && exit 0; attempt=0; while [ ! -f /data/adb/root-control/state/prepared ]; do attempt=$((attempt + 1)); [ $attempt -lt 60 ] || exit 1; sleep 1; done; exec /system/bin/sh /data/adb/root-control/bin/autostart.sh"
+    user root
+    group root
+    seclabel u:r:ksu:s0
+    disabled
+    oneshot
+
+on post-fs-data
+    start logd
+    start root_control_prepare
+
+on property:sys.boot_completed=1
+    start root_control_autostart
+

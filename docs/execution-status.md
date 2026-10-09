@@ -3,10 +3,10 @@
 ## 当前状态
 
 - ACTIVE_OBJECT：78boot 无 Manager 的固定脚本 root 控制方案。
-- LAST_CONFIRMED_RESULT：用户原候选已开机且 KernelSU 加载；新增自动启动与授权补丁已在副本实现，8 项自动启动主机测试通过，补丁重建和嵌入基线回滚通过，原始脚本完整哈希保持。
-- NEXT_EXECUTABLE_ACTION：通过 Actions 编译完全嵌入脚本的启动组件与修改后的 LKM，修补并签名 init_boot/vbmeta，然后下载复核。
-- INPUT_PATHS：`ci/autostart-kernel.patch`、`ci/root_bootstrap.c`、`scripts/autostart.sh`、`ci/1_no_login.sh.enc`、`config/upstreams.lock.json`。
-- ACCEPTANCE_EVENT：签名镜像中的 LKM 必须含完整启动组件，启动组件必须含原始完整 1_no_login.sh，主机验证及哈希通过。新候选设备重启和检测软件复测需用户手动 9008 刷入后进行。
+- LAST_CONFIRMED_RESULT：内嵌候选 Actions 37962844664 四任务成功；下载的 init_boot 中已验证完整脚本与启动组件字节一致、签名及回滚通过；8 项自动启动 fixture 检查及原生授权函数测试通过；真实 Android shell 调用 bootstrap 被拒绝，未执行载荷。
+- NEXT_EXECUTABLE_ACTION：用户手动 9008 将新签名 init_boot/vbmeta 写入 A 槽并开机后，读取 RootControl 日志确认准备、模式 1 自动启动及退出结果，再复测检测软件。
+- INPUT_PATHS：`out/autostart-37962844664/`、`verification/autostart-artifact-verification.json`、`verification/autostart-actions-result.json`、`verification/autostart-device-authorization.json`。
+- ACCEPTANCE_EVENT：新镜像设备重启后记录固定脚本模式 1 的真实启动结果，并保存普通 app root/SELinux 探测复测。当前镜像交付和主机验收完成；手动刷入按用户要求保留给用户。
 
 ## 已执行
 
@@ -59,6 +59,12 @@
 停用自动执行：`adb shell touch /data/local/tmp/root-control.disable`；删除标记会在下次开机重新启用。标记不用于提权，普通 app 无 /data/local/tmp 的创建权限。
 
 主机测试 `verification/autostart-host-tests.json`：未添加服务 BASELINE 无执行；MODIFIED fixture 收到 argument=1/stdin=1，退出 7；ROLLBACK 恢复无服务基线。覆盖本次开机不重复、下次开机重试、标记停用、非 root 和未开机完成拒绝。补丁与回滚见 `verification/autostart-patch-transaction.json`、`scripts/ROLLBACK-autostart.sh`。
+
+新的 Actions：https://github.com/NzflpKfnjos/78boot/actions/runs/37962844664 ，构建 commit `744d5bb5f615afdd212cfbf9ccf5d8d0f26489e2`，四任务成功。下载复核报告 `verification/autostart-artifact-verification.json` 确认 exact_bootstrap_in_module=true、完整原脚本 2,931,586 bytes、external_stage_required=false；init_boot 有效数据 7,483,392 bytes，分区总长仍为 8,388,608 bytes。
+
+新产物哈希：init_boot.img `3888ca88a3e32c2ed142b0a79fb0f02d7bb76933cf010b1047d8c9cd08049669`；vbmeta.img `6227585db6058e3236c2433ca54f92f9589f492cdcdfbcda78a5d75341b1eb0a`；LKM `cb440a14ba3fb6dba2d83306208e0a37f4781c62d757a624a413a7b9853ab92d`；bootstrap `4cac653c9527d6be8786ccda58efa96f3fbd6c9064aeccec401ceab63b2b89fe`。
+
+真实 Android 上仅测试了非 root 调用 bootstrap：UID 2000 被拒绝，退出 1，RootControl 日志为 `root-only preparation required: Operation not permitted`。临时二进制已删除；没有安装服务、修改 device policy 或运行载荷。native 真实函数体测试则验证 root 可获得 driver FD、shell/app UID 被拒绝、非 root app grant 恒 false。新 boot 流程需用户刷入后执行。
 
 ## 设备相关未完成项
 

@@ -1,0 +1,60 @@
+{
+  "path": "/Users/a77/Desktop/git/78boot/out/TB322-ZUXOS_1.1.11.263-embedded-autostart-37962844664.zip",
+  "directory": "/Users/a77/Desktop/git/78boot/out/autostart-37962844664",
+  "bytes": 12823611,
+  "sha256": "e7c35dc8f3249abdd7b9a3a9704ae1b5ef4b62422fbf362bb644dbe4a6836abe",
+  "zip_crc_and_entry_sha256_verified": true,
+  "images": {
+    "init_boot.img": {
+      "sha256": "3888ca88a3e32c2ed142b0a79fb0f02d7bb76933cf010b1047d8c9cd08049669",
+      "bytes": 8388608,
+      "avb": {
+        "algorithm": "NONE",
+        "rollback_index": 0,
+        "rollback_index_location": 0,
+        "flags": 0,
+        "public_key_sha1": null,
+        "original_image_size": 7483392,
+        "hashes": {
+          "init_boot": {
+            "digest": "5da059d68337e0c71e93407fa8744c4b53c74261db66069ebecf1a0314ece189",
+            "salt": "24b5533e3f2b35a03c0eeb338753ed722c3408c209ac9111b72a9106da0ba08a",
+            "image_size": 7483392
+          }
+        }
+      }
+    },
+    "vbmeta.img": {
+      "sha256": "6227585db6058e3236c2433ca54f92f9589f492cdcdfbcda78a5d75341b1eb0a",
+      "bytes": 12288,
+      "avb": {
+        "algorithm": "SHA256_RSA4096",
+        "rollback_index": 0,
+        "rollback_index_location": 0,
+        "flags": 0,
+        "public_key_sha1": "2597c218aae470a130f61162feaae70afd97f011",
+        "original_image_size": null,
+        "hashes": {
+          "dtbo": {
+            "digest": "2b5921e5d00df4c61aa614c4ae56f4cafe7bb4eb6b4db6e3e9ab7040b392e2e3",
+            "salt": "24b5533e3f2b35a03c0eeb338753ed722c3408c209ac9111b72a9106da0ba08a",
+            "image_size": 23346967
+          },
+          "init_boot": {
+            "digest": "5da059d68337e0c71e93407fa8744c4b53c74261db66069ebecf1a0314ece189",
+            "salt": "24b5533e3f2b35a03c0eeb338753ed722c3408c209ac9111b72a9106da0ba08a",
+            "image_size": 7483392
+          },
+          "vendor_boot": {
+            "digest": "9823133cb1381ae0b0ac4abf9b6bfd01f91c3aff3e228c1d8ec4c3f0b17ee5fc",
+            "salt": "24b5533e3f2b35a03c0eeb338753ed722c3408c209ac9111b72a9106da0ba08a",
+            "image_size": 15122432
+          }
+        }
+      }
+    }
+  },
+  "device_boot_verified": false,
+  "requires_payload_push": false,
+  "target_slot_observed": "_a"
+}
