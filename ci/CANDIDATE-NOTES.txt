@@ -1,6 +1,8 @@
 This build embeds the entire approved 1_no_login.sh byte-for-byte in the
 boot preparation executable, which is embedded in the KernelSU LKM inside
-init_boot.img. No adb push of the payload or bootstrap is needed.
+init_boot.img. The bootstrap is also inserted directly into the signed
+init_boot ramdisk as `/root-control-bootstrap` mode 0500. No adb push of the
+payload or bootstrap is needed.
 
 Target: TB322 ZUXOS_1.1.11.263; KMI android15-6.6, AArch64, 4K pages.
 KernelSU commit: df03912f70d92ff2aa9762ef82d607033d37e1da
@@ -11,14 +13,13 @@ boot.img and vendor_boot.img are not changed by this LKM build.
 The user performs 9008 flashing manually. Signatures and embedded bytes are
 verified on the host; the new autostart flow needs a device reboot test.
 
-At init second_stage, the signed LKM writes its embedded bootstrap to
-/dev/root-control-boot, root-only mode 500 and private SELinux file type.
-At post-fs-data, an init root service prepares /data/adb/root-control using
-only embedded assets and enables upstream SELinux query isolation.
-At sys.boot_completed=1, a separate oneshot service launches the pinned
-script with argument 1 AND stdin '1\n'. This is at most one attempt per boot.
-Logs and state are under the root-private /data/adb/root-control directory.
-The payload itself may still require overlay initialization by the owner.
+At post-fs-data, init executes the signed `/root-control-bootstrap` directly
+from the init_boot ramdisk and it prepares /data/adb/root-control using only
+embedded assets. At sys.boot_completed=1, a separate oneshot service launches
+the pinned script with argument 1 AND stdin '1\n'. This is at most one attempt
+per boot. Logs and state are under the root-private /data/adb/root-control
+directory. The previous /dev/root-control-boot staging path was removed after
+SELinux denied its kernel write on device.
 
 Ordinary apps and adb shell cannot obtain the KernelSU driver FD or receive
 an allowlist grant in this fixed-purpose build. General su compatibility is

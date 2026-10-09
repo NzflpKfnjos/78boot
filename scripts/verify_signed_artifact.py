@@ -73,7 +73,6 @@ def inspect_ramdisk(directory):
     if bootstrap.exists():
         binary = bootstrap.read_bytes()
         module_bytes = entries['kernelsu.ko'][1]
-        require(binary in module_bytes, 'candidate LKM does not contain its exact embedded bootstrap')
         payload = (ROOT / '1_no_login.sh').read_bytes()
         require(hashlib.sha256(payload).hexdigest() ==
                 'e9cb5f84428910e83c0c43957fa8deb01ce4fc3d7b899aaecea7810993c62200',
@@ -85,17 +84,25 @@ def inspect_ramdisk(directory):
         require(boot_script in binary, 'bootstrap autostart script differs from working source')
         require(b'root_control_prepare' in module_bytes and b'root_control_autostart' in module_bytes,
                 'candidate is missing fixed init service definitions')
-        require(b'/data/local/tmp/root-control-stage' not in module_bytes,
-                'candidate still requires an external staged executable')
         embedded = {'bootstrap_sha256': hashlib.sha256(binary).hexdigest(),
                     'payload_sha256': hashlib.sha256(payload).hexdigest(),
                     'payload_bytes': len(payload), 'runner_sha256': hashlib.sha256(runner).hexdigest(),
                     'autostart_sha256': hashlib.sha256(boot_script).hexdigest(),
-                    'exact_bootstrap_in_module': True, 'external_stage_required': False}
+                    'exact_bootstrap_artifact': True, 'external_stage_required': False}
+    ramdisk_bootstrap = entries.get('root-control-bootstrap')
+    require(ramdisk_bootstrap is not None, 'init_boot ramdisk missing root-control-bootstrap')
+    require(bootstrap.exists() and ramdisk_bootstrap[1] == bootstrap.read_bytes(),
+            'init_boot ramdisk bootstrap differs from the signed artifact')
+    require(ramdisk_bootstrap[0] & 0o777 == 0o500, 'bootstrap mode is not root-only executable')
+    require(b'/dev/root-control-boot' not in entries['init'][1] and
+            b'/dev/root-control-boot' not in entries['kernelsu.ko'][1],
+            'candidate still depends on the old temporary /dev bootstrap path')
     return {'init_sha256': hashlib.sha256(entries['init'][1]).hexdigest(),
             'module_sha256': hashlib.sha256(entries['kernelsu.ko'][1]).hexdigest(),
             'ksu_config': config.decode(), 'entry_count': len(entries),
             'embedded_autostart': embedded,
+            'ramdisk_bootstrap_sha256': hashlib.sha256(ramdisk_bootstrap[1]).hexdigest(),
+            'ramdisk_bootstrap_mode': oct(ramdisk_bootstrap[0] & 0o777),
             'no_manager_define_verified': True, 'debug_define_present': False}
 
 

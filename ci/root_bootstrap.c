@@ -1,6 +1,4 @@
-/* Fixed-purpose boot preparation. Executed by init as root in u:r:ksu:s0.
- * No shell granting, Manager, arbitrary arguments or public command endpoint.
- */
+/* Fixed-purpose boot service. The executable is a signed init_boot ramdisk member. */
 #define _GNU_SOURCE
 #include <errno.h>
 #include <fcntl.h>

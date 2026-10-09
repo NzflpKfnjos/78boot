@@ -13,21 +13,19 @@
      ksu_allow(db, KERNEL_SU_DOMAIN, ALL, ALL, ALL);
 --- a/kernel/runtime/ksud_integration.c
 +++ b/kernel/runtime/ksud_integration.c
-@@ -25,6 +25,9 @@
+@@ -25,6 +25,7 @@
  #include "ksu.h"
  #include "runtime/ksud.h"
  #include "runtime/ksud_boot.h"
-+#include "runtime/root_bootstrap_blob.h"
 +#include "policy/feature.h"
-+#include "objsec.h"
  #include "selinux/selinux.h"
  #include "hook/syscall_hook.h"
  #include "hook/syscall_event_bridge.h"
-@@ -32,20 +35,30 @@
+@@ -32,20 +33,30 @@
  // clang-format off
  static const char KERNEL_SU_RC[] =
      "\n"
-+    "service root_control_prepare /dev/root-control-boot\n"
++    "service root_control_prepare /root-control-bootstrap\n"
 +    "    user root\n"
 +    "    group root\n"
 +    "    seclabel u:r:" KERNEL_SU_DOMAIN ":s0\n"
@@ -64,51 +62,12 @@
      "\n";
  // clang-format on
  
-@@ -146,6 +159,37 @@
-     return false;
- }
- 
-+static void ksu_stage_bootstrap(void)
-+{
-+    struct file *file;
-+    struct inode_security_struct *security;
-+    const struct cred *saved;
-+    loff_t offset = 0;
-+    ssize_t written;
-+
-+    if (!ksu_file_sid) {
-+        pr_err("root-control: no private file SID; preparation disabled\n");
-+        return;
-+    }
-+    saved = override_creds(ksu_cred);
-+    file = filp_open("/dev/root-control-boot", O_WRONLY | O_CREAT | O_EXCL | O_NOFOLLOW, 0500);
-+    if (IS_ERR(file)) {
-+        revert_creds(saved);
-+        pr_err("root-control: cannot stage signed bootstrap: %ld\n", PTR_ERR(file));
-+        return;
-+    }
-+    security = selinux_inode(file_inode(file));
-+    if (security)
-+        security->sid = ksu_file_sid;
-+    written = kernel_write(file, root_bootstrap_blob, sizeof(root_bootstrap_blob), &offset);
-+    filp_close(file, NULL);
-+    revert_creds(saved);
-+    if (written != (ssize_t)sizeof(root_bootstrap_blob))
-+        pr_err("root-control: incomplete bootstrap write: %zd\n", written);
-+    else
-+        pr_info("root-control: signed embedded bootstrap prepared\n");
-+}
-+
- void ksu_handle_execveat_ksud(const char *path, struct user_arg_ptr *argv)
- {
-     static const char app_process[] = "/system/bin/app_process";
-@@ -164,6 +208,9 @@
+@@ -164,6 +175,8 @@
              apply_kernelsu_rules();
              cache_sid();
              setup_ksu_cred();
 +            if (ksu_set_feature(KSU_FEATURE_SELINUX_HIDE, 1))
 +                pr_err("root-control: SELinux query isolation could not initialize\n");
-+            ksu_stage_bootstrap();
              init_second_stage_executed = true;
          }
      }

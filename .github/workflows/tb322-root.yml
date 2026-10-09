@@ -55,8 +55,6 @@ jobs:
         run: |
           git -C upstream/KernelSU apply --check ../../ci/autostart-kernel.patch
           git -C upstream/KernelSU apply ../../ci/autostart-kernel.patch
-          python3 scripts/embed_bootstrap_blob.py --bootstrap artifacts/userspace/bootstrap \
-            --output upstream/KernelSU/kernel/runtime/root_bootstrap_blob.h
       - name: Build without Manager
         shell: bash
         run: |
@@ -182,7 +180,10 @@ jobs:
               path.chmod(0o600)
           PY
       - name: Verify stock input hashes
-        run: python3 scripts/verify_ci_inputs.py
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lz4
+          python3 scripts/verify_ci_inputs.py
       - name: Patch a copy of init_boot with the fixed no-Manager LKM
         run: |
           mkdir -p work/raw
@@ -192,8 +193,12 @@ jobs:
             --module artifacts/lkm/android15-6.6_kernelsu.ko \
             --init artifacts/userspace/ksuinit \
             --kmi android15-6.6 --out work/raw --out-name init_boot.img
+          python3 scripts/add_ramdisk_file.py \
+            --image work/raw/init_boot.img \
+            --bootstrap artifacts/userspace/bootstrap \
+            --output work/raw/init_boot-embedded.img
           python3 scripts/prepare_avb_input.py \
-            --stock ci/stock/init_boot.img --patched work/raw/init_boot.img \
+            --stock ci/stock/init_boot.img --patched work/raw/init_boot-embedded.img \
             --output work/init_boot.img
       - name: Sign with the supplied tool and require signature verification
         run: |
